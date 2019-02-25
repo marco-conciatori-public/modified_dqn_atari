@@ -13,7 +13,7 @@ from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
 from baselines import deepq
-from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer, test
 from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
@@ -101,7 +101,8 @@ def learn(env,
           exploration_fraction=0.1,
           exploration_final_eps=0.02,
           train_freq=1,
-          batch_size=32,
+          replay_batch_size=32,
+          lb_batch_size=16,
           print_freq=100,
           checkpoint_freq=10000,
           checkpoint_path=None,
@@ -116,8 +117,7 @@ def learn(env,
           param_noise=False,
           callback=None,
           load_path=None,
-          **network_kwargs
-            ):
+          **network_kwargs):
     """Train a deepq model.
 
     Parameters
@@ -143,8 +143,10 @@ def learn(env,
     train_freq: int
         update the model every `train_freq` steps.
         set to None to disable printing
-    batch_size: int
-        size of a batched sampled from replay buffer for training
+    replay_batch_size: int
+        max size of a batched sampled from replay buffer for training
+    lb_batch_size: int
+        max size of a batched sampled from lower bound replay buffer for training
     print_freq: int
         how often to print out training progress
         set to None to disable printing
@@ -233,6 +235,9 @@ def learn(env,
                                  initial_p=1.0,
                                  final_p=exploration_final_eps)
 
+    # Create lower bounds buffer
+    lb_buffer = LowerBoundReplayBuffer(buffer_size)
+
     # Initialize the parameters and copy them to the target network.
     U.initialize()
     update_target()
@@ -255,7 +260,6 @@ def learn(env,
         elif load_path is not None:
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
-
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -282,6 +286,8 @@ def learn(env,
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done))
+            lb_buffer.memorize_transition(obs, action, rew)
+            old_obs = obs
             obs = new_obs
 
             episode_rewards[-1] += rew
@@ -289,15 +295,26 @@ def learn(env,
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
+                lb_buffer.compute_lb()
 
             if t > learning_starts and t % train_freq == 0:
+                lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
+                estimated_rewards = debug['q_values'](lb_obses_t)
+                indexes = test(lb_actions, lb_rewards, estimated_rewards)
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 if prioritized_replay:
-                    experience = replay_buffer.sample(batch_size, beta=beta_schedule.value(t))
+                    experience = replay_buffer.sample(replay_batch_size - len(indexes), beta=beta_schedule.value(t))
                     (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
                 else:
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
+                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size)
                     weights, batch_idxes = np.ones_like(rewards), None
+                for i in indexes:
+                    obses_t.append(lb_obses_t[i])
+                    actions.append(lb_actions[i])
+                    rewards.append(lb_rewards[i])
+                    obses_tp1.append(lb_obses_tp1[i])
+                    dones.append(lb_dones[i])
+
                 td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 if prioritized_replay:
                     new_priorities = np.abs(td_errors) + prioritized_replay_eps
@@ -315,6 +332,8 @@ def learn(env,
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
+
+                # print(debug['q_values']([old_obs]))
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):

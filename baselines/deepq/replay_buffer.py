@@ -68,6 +68,53 @@ class ReplayBuffer(object):
         return self._encode_sample(idxes)
 
 
+class LowerBoundReplayBuffer(ReplayBuffer):
+    def __init__(self, size):
+        """Create Lower Bound Replay buffer.
+
+        Parameters
+        ----------
+        size: int
+            Max number of transitions to store in the buffer. When the buffer
+            overflows the old memories are dropped.
+
+        See Also
+        --------
+        ReplayBuffer.__init__
+        """
+        super().__init__(size)
+        self._episode_transitions = []
+
+    def add(self, obs_t, action, reward, *unused_args):
+        super().add(obs_t, action, reward, None, float(True))
+
+    def _encode_sample(self, idxes):
+        obses_t, actions, rewards = [], [], []
+        for i in idxes:
+            data = self._storage[i]
+            obs_t, action, reward, _, _ = data
+            obses_t.append(np.array(obs_t, copy=False))
+            actions.append(np.array(action, copy=False))
+            rewards.append(reward)
+        return np.array(obses_t), np.array(actions), np.array(rewards), None, float(True)
+        # return np.array(obses_t), np.array(actions), np.array(rewards)
+
+    def compute_lb(self):
+        index = len(self._episode_transitions) - 1
+        cumulative_reward = 0
+        while index >= 0:
+            obs_t, action, reward = self._episode_transitions[index]
+            cumulative_reward += reward
+            self.add(obs_t, action, cumulative_reward)
+            index -= 1
+
+        self._episode_transitions = []
+
+    def memorize_transition(self, obs_t, action, reward):
+        data = (obs_t, action, reward)
+        self._episode_transitions.append(data)
+
+
 class PrioritizedReplayBuffer(ReplayBuffer):
     def __init__(self, size, alpha):
         """Create Prioritized Replay buffer.
@@ -189,3 +236,17 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             self._it_min[idx] = priority ** self._alpha
 
             self._max_priority = max(self._max_priority, priority)
+
+
+def test(actions, lb_rewards, estimated_rewards):
+    indexes = []
+    for i in range(len(lb_rewards)):
+        lb_rew = lb_rewards[i]
+        estimated_rew = estimated_rewards[i]
+        act = actions[i]
+        estimated_rew = estimated_rew[act]
+
+        if lb_rew > estimated_rew:
+            indexes.append(i)
+
+    return indexes
