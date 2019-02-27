@@ -89,14 +89,17 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         super().add(obs_t, action, reward, None, float(True))
 
     def _encode_sample(self, idxes):
-        obses_t, actions, rewards = [], [], []
+        obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
         for i in idxes:
             data = self._storage[i]
             obs_t, action, reward, _, _ = data
             obses_t.append(np.array(obs_t, copy=False))
             actions.append(np.array(action, copy=False))
             rewards.append(reward)
-        return np.array(obses_t), np.array(actions), np.array(rewards), None, float(True)
+            obses_tp1.append(None)
+            dones.append(float(True))
+
+        return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
         # return np.array(obses_t), np.array(actions), np.array(rewards)
 
     def compute_lb(self):

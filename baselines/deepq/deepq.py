@@ -247,6 +247,9 @@ def learn(env,
     obs = env.reset()
     reset = True
 
+    lb_extracted = 0
+    lb_used = 0
+
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -299,8 +302,10 @@ def learn(env,
 
             if t > learning_starts and t % train_freq == 0:
                 lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
+                lb_extracted += len(lb_obses_t)
                 estimated_rewards = debug['q_values'](lb_obses_t)
                 indexes = test(lb_actions, lb_rewards, estimated_rewards)
+                lb_used += len(indexes)
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 if prioritized_replay:
                     experience = replay_buffer.sample(replay_batch_size - len(indexes), beta=beta_schedule.value(t))
@@ -332,8 +337,13 @@ def learn(env,
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
-
                 # print(debug['q_values']([old_obs]))
+                if lb_extracted > 0:
+                    logger.record_tabular('lb_extracted', lb_extracted)
+                    logger.record_tabular('lb_used', lb_used)
+                    logger.record_tabular('%', 100 * lb_used / lb_extracted)
+                    logger.dump_tabular()
+                print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
