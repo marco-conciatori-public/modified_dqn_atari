@@ -69,7 +69,7 @@ class ReplayBuffer(object):
 
 
 class LowerBoundReplayBuffer(ReplayBuffer):
-    def __init__(self, size):
+    def __init__(self, size, gamma):
         """Create Lower Bound Replay buffer.
 
         Parameters
@@ -84,6 +84,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         """
         super().__init__(size)
         self._episode_transitions = []
+        self.gamma = gamma
 
     def add(self, obs_t, action, reward, *unused_args):
         super().add(obs_t, action, reward, None, float(True))
@@ -107,7 +108,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         cumulative_reward = 0
         while index >= 0:
             obs_t, action, reward = self._episode_transitions[index]
-            cumulative_reward += reward
+            cumulative_reward = cumulative_reward * self.gamma + reward
             self.add(obs_t, action, cumulative_reward)
             index -= 1
 

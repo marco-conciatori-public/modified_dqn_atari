@@ -236,7 +236,7 @@ def learn(env,
                                  final_p=exploration_final_eps)
 
     # Create lower bounds buffer
-    lb_buffer = LowerBoundReplayBuffer(buffer_size)
+    lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
 
     # Initialize the parameters and copy them to the target network.
     U.initialize()
