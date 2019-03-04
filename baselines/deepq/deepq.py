@@ -211,6 +211,8 @@ def learn(env,
         param_noise=param_noise
     )
 
+    q_values = debug['q_values']
+
     act_params = {
         'make_obs_ph': make_obs_ph,
         'q_func': q_func,
@@ -303,8 +305,9 @@ def learn(env,
             if t > learning_starts and t % train_freq == 0:
                 lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
                 lb_extracted += len(lb_obses_t)
-                estimated_rewards = debug['q_values'](lb_obses_t)
-                indexes = test(lb_actions, lb_rewards, estimated_rewards)
+                estimated_rewards = q_values(lb_obses_t)
+                indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
+                lb_buffer.remove_experiences(to_remove)
                 lb_used += len(indexes)
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 if prioritized_replay:
@@ -337,7 +340,7 @@ def learn(env,
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
-                # print(debug['q_values']([old_obs]))
+                # print(q_values([old_obs]))
                 if lb_extracted > 0:
                     logger.record_tabular('lb_extracted', lb_extracted)
                     logger.record_tabular('lb_used', lb_used)

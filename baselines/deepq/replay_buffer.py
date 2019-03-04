@@ -85,9 +85,13 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         super().__init__(size)
         self._episode_transitions = []
         self.gamma = gamma
+        self.free_indexes = []
 
     def add(self, obs_t, action, reward, *unused_args):
-        super().add(obs_t, action, reward, None, float(True))
+        if len(self.free_indexes) > 0:
+            self._storage.insert(self.free_indexes.pop(), (obs_t, action, reward, None, float(True)))
+        else:
+            super().add(obs_t, action, reward, None, float(True))
 
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
@@ -119,9 +123,23 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
         self._episode_transitions = []
 
+    def sample(self, batch_size):
+        indexes = []
+        while len(indexes) < batch_size:
+            temp_index = random.randint(0, len(self._storage) - 1)
+            if temp_index not in self.free_indexes:
+                indexes.append(random.randint(0, len(self._storage) - 1))
+        return self._encode_sample(indexes)
+
     def memorize_transition(self, obs_t, action, reward):
         data = (obs_t, action, reward)
         self._episode_transitions.append(data)
+
+    def remove_experiences(self, to_remove):
+        for i in to_remove:
+            self._storage[i] = None
+            self.free_indexes.append(i)
+
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
@@ -249,6 +267,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
 def test(actions, lb_rewards, estimated_rewards):
     indexes = []
+    to_remove = []
     for i in range(len(lb_rewards)):
         lb_rew = lb_rewards[i]
         estimated_rew = estimated_rewards[i]
@@ -257,5 +276,7 @@ def test(actions, lb_rewards, estimated_rewards):
 
         if lb_rew > estimated_rew:
             indexes.append(i)
+        else:
+            to_remove.append(i)
 
-    return indexes
+    return indexes, to_remove
