@@ -106,10 +106,15 @@ class LowerBoundReplayBuffer(ReplayBuffer):
     def compute_lb(self):
         index = len(self._episode_transitions) - 1
         cumulative_reward = 0
+        got_reward = False
         while index >= 0:
             obs_t, action, reward = self._episode_transitions[index]
-            cumulative_reward = cumulative_reward * self.gamma + reward
-            self.add(obs_t, action, cumulative_reward)
+            if reward > 0:
+                got_reward = True
+
+            if got_reward:
+                cumulative_reward = cumulative_reward * self.gamma + reward
+                self.add(obs_t, action, cumulative_reward)
             index -= 1
 
         self._episode_transitions = []
