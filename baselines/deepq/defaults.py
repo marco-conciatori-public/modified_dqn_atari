@@ -10,7 +10,7 @@ def atari():
         # network_kwargs=network_kwargs,
         # total_timesteps=100000,
 
-        print_freq=1,
+        print_freq=100,
 
         learning_starts=10000,
         target_network_update_freq=1000,
