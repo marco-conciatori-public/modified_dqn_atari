@@ -89,7 +89,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
     def add(self, obs_t, action, reward, *unused_args):
         if len(self.free_indexes) > 0:
-            self._storage.insert(self.free_indexes.pop(), (obs_t, action, reward, None, float(True)))
+            self._storage[self.free_indexes.pop()] = (obs_t, action, reward, None, float(True))
         else:
             super().add(obs_t, action, reward, None, float(True))
 
@@ -148,6 +148,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
     def remove_experiences(self, to_remove):
         for i in to_remove:
+            print('removing index:', i)
             self._storage[i] = None
             self.free_indexes.append(i)
 
