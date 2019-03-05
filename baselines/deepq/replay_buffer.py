@@ -139,7 +139,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         while len(indexes) < batch_size:
             temp_index = random.randint(0, max_index)
             if temp_index not in self.free_indexes:
-                indexes.append(random.randint(0, max_index))
+                indexes.append(temp_index)
         return self._encode_sample(indexes)
 
     def memorize_transition(self, obs_t, action, reward):
