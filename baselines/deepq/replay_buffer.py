@@ -97,7 +97,17 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
         for i in idxes:
             data = self._storage[i]
-            obs_t, action, reward, _, _ = data
+            try:
+                obs_t, action, reward, _, _ = data
+            except TypeError as e:
+                print('Errore:', e)
+                print('Esperienza (tupla):', data)
+                print('indice esp:', i)
+                print('puntatore ciclico:', self._next_idx)
+                print('free_indexes:', self.free_indexes)
+                print('len(_storage):', len(self._storage))
+
+                raise SystemExit
             obses_t.append(np.array(obs_t, copy=False))
             actions.append(np.array(action, copy=False))
             rewards.append(reward)
@@ -125,10 +135,11 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
     def sample(self, batch_size):
         indexes = []
+        max_index = len(self._storage) - 1
         while len(indexes) < batch_size:
-            temp_index = random.randint(0, len(self._storage) - 1)
+            temp_index = random.randint(0, max_index)
             if temp_index not in self.free_indexes:
-                indexes.append(random.randint(0, len(self._storage) - 1))
+                indexes.append(random.randint(0, max_index))
         return self._encode_sample(indexes)
 
     def memorize_transition(self, obs_t, action, reward):
@@ -139,7 +150,6 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         for i in to_remove:
             self._storage[i] = None
             self.free_indexes.append(i)
-
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
