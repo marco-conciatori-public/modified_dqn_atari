@@ -251,6 +251,8 @@ def learn(env,
 
     lb_extracted = 0
     lb_used = 0
+    lb_removed = 0
+    replay_counter = 0
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -303,25 +305,29 @@ def learn(env,
                 lb_buffer.compute_lb()
 
             if t > learning_starts and t % train_freq == 0:
-                lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
-                lb_extracted += len(lb_obses_t)
-                estimated_rewards = q_values(lb_obses_t)
-                indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
-                lb_buffer.remove_experiences(to_remove)
-                lb_used += len(indexes)
+                if not prioritized_replay:
+                    lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
+                    lb_extracted += len(lb_obses_t)
+                    estimated_rewards = q_values(lb_obses_t)
+                    indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
+                    lb_buffer.remove_experiences(to_remove)
+                    lb_used += len(indexes)
+                    lb_removed += len(to_remove)
+                    replay_counter += replay_batch_size
+
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
-                if prioritized_replay:
-                    experience = replay_buffer.sample(replay_batch_size - len(indexes), beta=beta_schedule.value(t))
-                    (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
+                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
+
+                    for i in indexes:
+                        np.append(obses_t, lb_obses_t[i])
+                        np.append(actions, lb_actions[i])
+                        np.append(rewards, lb_rewards[i])
+                        np.append(obses_tp1, lb_obses_tp1[i])
+                        np.append(dones, lb_dones[i])
+                    weights = np.ones_like(rewards)
                 else:
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size)
-                    weights, batch_idxes = np.ones_like(rewards), None
-                for i in indexes:
-                    np.append(obses_t, lb_obses_t[i])
-                    np.append(actions, lb_actions[i])
-                    np.append(rewards, lb_rewards[i])
-                    np.append(obses_tp1, lb_obses_tp1[i])
-                    np.append(dones, lb_dones[i])
+                    experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
+                    (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
 
                 td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 if prioritized_replay:
@@ -341,12 +347,13 @@ def learn(env,
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
                 # print(q_values([old_obs]))
-                if lb_extracted > 0:
-                    logger.record_tabular('lb_extracted', lb_extracted)
-                    logger.record_tabular('lb_used', lb_used)
-                    logger.record_tabular('%', 100 * lb_used / lb_extracted)
-                    logger.dump_tabular()
-                print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+                if not prioritized_replay:
+                    if lb_extracted > 0:
+                        logger.record_tabular('% lb usati su quelli estratti', 100 * lb_used / lb_extracted)
+                        logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
+                        logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
+                        logger.dump_tabular()
+                    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):

@@ -107,7 +107,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                 print('free_indexes:', self.free_indexes)
                 print('len(_storage):', len(self._storage))
                 raise SystemExit
-            
+
             obses_t.append(np.array(obs_t, copy=False))
             actions.append(np.array(action, copy=False))
             rewards.append(reward)
