@@ -54,6 +54,8 @@ class ActWrapper(object):
 
     def save_act(self, path=None):
         """Save model to a pickle located at `path`"""
+        print('test 1', flush=True)
+
         if path is None:
             path = os.path.join(logger.get_dir(), "model.pkl")
 
@@ -70,7 +72,7 @@ class ActWrapper(object):
                 model_data = f.read()
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
-        print('custom save')
+        print('test 2', flush=True)
 
     def save(self, path):
         save_variables(path)
