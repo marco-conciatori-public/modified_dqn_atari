@@ -369,4 +369,14 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
+        # from google.colab import files
+
+        print('env.spec:', env.spec)
+        print('str(env):', str(env))
+
+        # with open('example.txt', 'w') as f:
+        #     f.write('some content')
+        #
+        # files.download('example.txt')
+
     return act
