@@ -371,6 +371,7 @@ def learn(env,
 
         # from google.colab import files
 
+        print('test', flush=True)
         print('env.spec:', env.spec)
         print('str(env):', str(env))
 
