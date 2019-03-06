@@ -70,6 +70,7 @@ class ActWrapper(object):
                 model_data = f.read()
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
+        print('custom save')
 
     def save(self, path):
         save_variables(path)
@@ -370,10 +371,11 @@ def learn(env,
             load_variables(model_file)
 
         # from google.colab import files
-
-        print('env.spec:', env.spec.id)
-
-        # with open('example.txt', 'w') as f:
+        #
+        # print('env.spec:', env.spec.id)
+        # file_name = env.spec.id +
+        #
+        # with open(file_name, 'w') as f:
         #     f.write('some content')
         #
         # files.download('example.txt')
