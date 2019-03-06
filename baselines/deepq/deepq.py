@@ -371,9 +371,7 @@ def learn(env,
 
         # from google.colab import files
 
-        print('test', flush=True)
-        print('env.spec:', env.spec)
-        print('str(env):', str(env))
+        print('env.spec:', env.spec[0])
 
         # with open('example.txt', 'w') as f:
         #     f.write('some content')
