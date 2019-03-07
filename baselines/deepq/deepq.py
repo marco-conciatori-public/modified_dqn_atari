@@ -54,7 +54,6 @@ class ActWrapper(object):
 
     def save_act(self, path=None):
         """Save model to a pickle located at `path`"""
-        print('test 1', flush=True)
 
         if path is None:
             path = os.path.join(logger.get_dir(), "model.pkl")
@@ -72,7 +71,14 @@ class ActWrapper(object):
                 model_data = f.read()
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
-        print('test 2', flush=True)
+        return path
+
+    def download_act(self, path):
+        from google.colab import files
+
+        # print('env.spec:', env.spec.id)
+        # file_name = env.spec.id +
+        files.download(path)
 
     def save(self, path):
         save_variables(path)
@@ -372,14 +378,7 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        # from google.colab import files
-        #
-        # print('env.spec:', env.spec.id)
-        # file_name = env.spec.id +
-        #
-        # with open(file_name, 'w') as f:
-        #     f.write('some content')
-        #
-        # files.download('example.txt')
+        path = act.save_act()
+        act.download_act(path)
 
     return act
