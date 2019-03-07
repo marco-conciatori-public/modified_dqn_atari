@@ -18,6 +18,7 @@ from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
 from baselines.deepq.models import build_q_func
+from baselines.deepq.defaults import atari
 
 
 class ActWrapper(object):
@@ -52,7 +53,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, path=None):
+    def save_act(self, total_timesteps, path=None):
         """Save model to a pickle located at `path`"""
 
         if path is None:
@@ -69,17 +70,15 @@ class ActWrapper(object):
                             zipf.write(file_path, os.path.relpath(file_path, td))
             with open(arc_name, "rb") as f:
                 model_data = f.read()
-        with open(path, "wb") as f:
-            cloudpickle.dump((model_data, self._act_params), f)
 
-        print('path:', path)
-        print('logger.get_dir():', logger.get_dir())
+        train_params = atari()
+        train_params['total_timesteps'] = total_timesteps
+        with open(path, "wb") as f:
+            cloudpickle.dump((model_data, self._act_params, train_params), f)
 
         from google.colab import files
-        # print('env.spec:', env.spec.id)
-        # file_name = env.spec.id +
-        files.download(path)
-        print('end download')
+        temp_path = os.path.join(logger.get_dir(), path)
+        files.download(temp_path)
 
     def save(self, path):
         save_variables(path)
@@ -379,6 +378,6 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        act.save_act('break')
+        act.save_act(env.spec.id, total_timesteps)
 
     return act
