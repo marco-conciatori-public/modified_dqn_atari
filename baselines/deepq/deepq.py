@@ -72,6 +72,8 @@ class ActWrapper(object):
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
 
+        print('path:', path)
+
         from google.colab import files
         # print('env.spec:', env.spec.id)
         # file_name = env.spec.id +
