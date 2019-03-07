@@ -53,7 +53,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, total_timesteps, path=None):
+    def save_act(self, path=None, total_timesteps=0):
         """Save model to a pickle located at `path`"""
 
         if path is None:
@@ -378,6 +378,6 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        act.save_act(str(env.spec.id), total_timesteps)
+        act.save_act(env.spec.id, total_timesteps)
 
     return act
