@@ -71,6 +71,7 @@ class ActWrapper(object):
                 model_data = f.read()
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
+        print('end save')
         return path
 
     def download_act(self, path):
@@ -79,6 +80,7 @@ class ActWrapper(object):
         # print('env.spec:', env.spec.id)
         # file_name = env.spec.id +
         files.download(path)
+        print('end download')
 
     def save(self, path):
         save_variables(path)
