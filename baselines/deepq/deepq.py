@@ -72,11 +72,11 @@ class ActWrapper(object):
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
 
-            from google.colab import files
-            # print('env.spec:', env.spec.id)
-            # file_name = env.spec.id +
-            files.download(f)
-            print('end download')
+        from google.colab import files
+        # print('env.spec:', env.spec.id)
+        # file_name = env.spec.id +
+        files.download(path)
+        print('end download')
 
     def save(self, path):
         save_variables(path)
@@ -376,6 +376,6 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        act.save_act()
+        act.save_act('break')
 
     return act
