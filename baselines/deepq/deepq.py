@@ -76,9 +76,9 @@ class ActWrapper(object):
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params, train_params), f)
 
-        from google.colab import files
-        temp_path = os.path.join(logger.get_dir(), path)
-        files.download(temp_path)
+        # from google.colab import files
+        # temp_path = os.path.join(logger.get_dir(), path)
+        # files.download(temp_path)
 
     def save(self, path):
         save_variables(path)
