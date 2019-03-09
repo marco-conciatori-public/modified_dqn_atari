@@ -374,6 +374,9 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        act.save_act(env.spec.id + '_' + saved_mean_reward + '.pkl', total_timesteps)
-
+        if model_saved:
+            act.save_act(env.spec.id + '_' + saved_mean_reward + '.pkl', total_timesteps)
+        else:
+            act.save_act(env.spec.id + '_' + mean_100ep_reward + '.pkl', total_timesteps)
+        
     return act
