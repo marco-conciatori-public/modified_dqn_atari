@@ -375,8 +375,10 @@ def learn(env,
             load_variables(model_file)
 
         if model_saved:
-            act.save_act(env.spec.id + '_' + saved_mean_reward + '.pkl', total_timesteps)
+            file_name = env.spec.id + '_rew' + str(saved_mean_reward) + '_steps' + str(total_timesteps) + '.pkl'
         else:
-            act.save_act(env.spec.id + '_' + mean_100ep_reward + '.pkl', total_timesteps)
-        
+            file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(total_timesteps) + '.pkl'
+
+        act.save_act(file_name, total_timesteps)
+
     return act
