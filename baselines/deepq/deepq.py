@@ -379,6 +379,7 @@ def learn(env,
         else:
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(total_timesteps) + '.pkl'
 
-        act.save_act(file_name, total_timesteps)
+        file_path = os.path.join('trained_models', file_name)
+        act.save_act(file_path, total_timesteps)
 
     return act
