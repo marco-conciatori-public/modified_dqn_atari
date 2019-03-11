@@ -5,6 +5,7 @@ import tensorflow as tf
 import zipfile
 import cloudpickle
 import numpy as np
+import time
 
 import baselines.common.tf_util as U
 from baselines.common.tf_util import load_variables, save_variables
@@ -194,6 +195,8 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
+    start_time = time.time()
+
     sess = get_session()
     set_global_seeds(seed)
 
@@ -373,6 +376,8 @@ def learn(env,
             if print_freq is not None:
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
+
+        print("--- %s seconds ---" % (time.time() - start_time))
 
         if model_saved:
             file_name = env.spec.id + '_rew' + str(saved_mean_reward) + '_steps' + str(total_timesteps) + '.pkl'
