@@ -54,7 +54,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, path=None, total_timesteps=0):
+    def save_act(self, path=None):
         """Save model to a pickle located at `path`"""
 
         if path is None:
@@ -73,7 +73,6 @@ class ActWrapper(object):
                 model_data = f.read()
 
         train_params = atari()
-        train_params['total_timesteps'] = total_timesteps
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params, train_params), f)
 
@@ -389,7 +388,7 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        act.save_act(file_path, total_timesteps)
+        act.save_act(file_path)
         print('times:')
         for ti in times:
             print(ti[0], ';', ti[1])
