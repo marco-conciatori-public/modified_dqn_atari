@@ -361,7 +361,8 @@ def learn(env,
                         logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
                         logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
                         logger.dump_tabular()
-                    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+                print("--- %s seconds ---" % (time.time() - start_time))
+                print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
