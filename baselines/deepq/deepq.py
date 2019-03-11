@@ -195,6 +195,7 @@ def learn(env,
     # Create all the functions necessary to train the model
 
     now = time.time()
+    temp_steps = 0
     times = []
     times.append((0, 0))
 
@@ -364,7 +365,8 @@ def learn(env,
                 #         logger.dump_tabular()
                 temp_time = now
                 now = time.time()
-                times.append((now - temp_time, t))
+                times.append((now - temp_time, t - temp_steps))
+                temp_steps = t
                 # print("--- %s seconds ---" % (time.time() - start_time))
                 #     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
@@ -391,6 +393,9 @@ def learn(env,
         act.save_act(file_path)
         print('times:')
         for ti in times:
-            print(ti[0], ';', ti[1])
+            print(ti[0])
+        print('steps:')
+        for ti in times:
+            print(ti[1])
 
     return act
