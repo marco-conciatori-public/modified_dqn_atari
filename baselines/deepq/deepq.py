@@ -391,6 +391,7 @@ def learn(env,
         file_path = os.path.join('trained_models', file_name)
         act.save_act(file_path, total_timesteps)
         print('times:')
-        print(times)
+        for ti in times:
+            print(ti[0], ';', ti[1])
 
     return act
