@@ -195,7 +195,9 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
-    start_time = time.time()
+    now = time.time()
+    times = []
+    times.append((0, 0))
 
     sess = get_session()
     set_global_seeds(seed)
@@ -355,14 +357,17 @@ def learn(env,
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
                 # print(q_values([old_obs]))
-                if not prioritized_replay:
-                    if lb_extracted > 0:
-                        logger.record_tabular('% lb usati su quelli estratti', 100 * lb_used / lb_extracted)
-                        logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
-                        logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
-                        logger.dump_tabular()
-                print("--- %s seconds ---" % (time.time() - start_time))
-                print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+                # if not prioritized_replay:
+                #     if lb_extracted > 0:
+                #         logger.record_tabular('% lb usati su quelli estratti', 100 * lb_used / lb_extracted)
+                #         logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
+                #         logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
+                #         logger.dump_tabular()
+                temp_time = now
+                now = time.time()
+                times.append((now - temp_time, t))
+                # print("--- %s seconds ---" % (time.time() - start_time))
+                #     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
@@ -378,8 +383,6 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
-        print("--- %s seconds ---" % (time.time() - start_time))
-
         if model_saved:
             file_name = env.spec.id + '_rew' + str(saved_mean_reward) + '_steps' + str(total_timesteps) + '.pkl'
         else:
@@ -387,5 +390,7 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
         act.save_act(file_path, total_timesteps)
+        print('times:')
+        print(times)
 
     return act
