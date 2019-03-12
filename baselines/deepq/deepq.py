@@ -278,7 +278,7 @@ def learn(env,
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
-        start_time = time.time()
+        tot_time = -time.time()
         memorize_transition_time = 0
         compute_lb_time = 0
         sample_time = 0
@@ -338,7 +338,7 @@ def learn(env,
                     test_time -= time.time()
                     estimated_rewards = q_values(lb_obses_t)
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
-                    test_time -= time.time()
+                    test_time += time.time()
 
                     remove_experiences_time -= time.time()
                     lb_buffer.remove_experiences(to_remove)
@@ -404,7 +404,7 @@ def learn(env,
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
 
-        end_time = time.time()
+        tot_time += time.time()
 
         if model_saved:
             if print_freq is not None:
@@ -424,7 +424,6 @@ def learn(env,
         # print('steps:')
         # for ti in times:
         #     print(ti[1])
-        tot_time = end_time - start_time
         logger.record_tabular("% memorize_transition_time", int(100 * memorize_transition_time / tot_time))
         logger.record_tabular("% compute_lb_time", int(100 * compute_lb_time / tot_time))
         logger.record_tabular("% sample_time", int(100 * sample_time / tot_time))
