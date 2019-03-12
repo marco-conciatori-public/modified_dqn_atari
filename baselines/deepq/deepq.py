@@ -194,10 +194,10 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
-    # now = time.time()
-    # temp_steps = 0
-    # times = []
-    # times.append((0, 0))
+    now = time.time()
+    temp_steps = 0
+    times = []
+    times.append((0, 0))
 
     sess = get_session()
     set_global_seeds(seed)
@@ -387,10 +387,10 @@ def learn(env,
                 #         logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
                 #         logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
                 #         logger.dump_tabular()
-                # temp_time = now
-                # now = time.time()
-                # times.append((now - temp_time, t - temp_steps))
-                # temp_steps = t
+                temp_time = now
+                now = time.time()
+                times.append((now - temp_time, t - temp_steps))
+                temp_steps = t
                 # print("--- %s seconds ---" % (time.time() - start_time))
                 #     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
@@ -418,12 +418,12 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
         act.save_act(file_path)
-        # print('times:')
-        # for ti in times:
-        #     print(ti[0])
-        # print('steps:')
-        # for ti in times:
-        #     print(ti[1])
+        print('times:')
+        for ti in times:
+            print(ti[0])
+        print('steps:')
+        for ti in times:
+            print(ti[1])
         logger.record_tabular("% memorize_transition_time", int(100 * memorize_transition_time / tot_time))
         logger.record_tabular("% compute_lb_time", int(100 * compute_lb_time / tot_time))
         logger.record_tabular("% sample_time", int(100 * sample_time / tot_time))
