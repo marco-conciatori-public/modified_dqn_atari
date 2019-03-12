@@ -424,13 +424,13 @@ def learn(env,
         print('steps:')
         for ti in times:
             print(ti[1])
-        logger.record_tabular("% memorize_transition_time", int(100 * memorize_transition_time / tot_time))
-        logger.record_tabular("% compute_lb_time", int(100 * compute_lb_time / tot_time))
-        logger.record_tabular("% sample_time", int(100 * sample_time / tot_time))
-        logger.record_tabular("% test_time", int(100 * test_time / tot_time))
-        logger.record_tabular("% remove_experiences_time", int(100 * remove_experiences_time / tot_time))
-        logger.record_tabular("% append_time", int(100 * append_time / tot_time))
-        logger.record_tabular("% tot lb time", int(100 * memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time / tot_time))
+        logger.record_tabular("% memorize_transition_time", 100 * memorize_transition_time / tot_time)
+        logger.record_tabular("% compute_lb_time", 100 * compute_lb_time / tot_time)
+        logger.record_tabular("% sample_time", 100 * sample_time / tot_time)
+        logger.record_tabular("% test_time", 100 * test_time / tot_time)
+        logger.record_tabular("% remove_experiences_time", 100 * remove_experiences_time / tot_time)
+        logger.record_tabular("% append_time", 100 * append_time / tot_time)
+        logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time) / tot_time)
         logger.dump_tabular()
 
     return act
