@@ -194,10 +194,10 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
-    now = time.time()
-    temp_steps = 0
-    times = []
-    times.append((0, 0))
+    # now = time.time()
+    # temp_steps = 0
+    # times = []
+    # times.append((0, 0))
 
     sess = get_session()
     set_global_seeds(seed)
@@ -259,10 +259,10 @@ def learn(env,
     obs = env.reset()
     reset = True
 
-    lb_extracted = 0
-    lb_used = 0
-    lb_removed = 0
-    replay_counter = 0
+    # lb_extracted = 0
+    # lb_used = 0
+    # lb_removed = 0
+    # replay_counter = 0
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -278,6 +278,13 @@ def learn(env,
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
+        start_time = time.time()
+        memorize_transition_time = 0
+        compute_lb_time = 0
+        sample_time = 0
+        test_time = 0
+        remove_experiences_time = 0
+        append_time = 0
         for t in range(total_timesteps):
             if callback is not None:
                 if callback(locals(), globals()):
@@ -303,8 +310,11 @@ def learn(env,
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done))
+
+            memorize_transition_time -= time.time()
             lb_buffer.memorize_transition(obs, action, rew)
-            old_obs = obs
+            memorize_transition_time += time.time()
+
             obs = new_obs
 
             episode_rewards[-1] += rew
@@ -312,28 +322,43 @@ def learn(env,
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
+
+                compute_lb_time -= time.time()
                 lb_buffer.compute_lb()
+                compute_lb_time += time.time()
+
 
             if t > learning_starts and t % train_freq == 0:
                 if not prioritized_replay:
+                    sample_time -= time.time()
                     lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
-                    lb_extracted += len(lb_obses_t)
+                    sample_time += time.time()
+
+                    # lb_extracted += len(lb_obses_t)
+                    test_time -= time.time()
                     estimated_rewards = q_values(lb_obses_t)
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
+                    test_time -= time.time()
+
+                    remove_experiences_time -= time.time()
                     lb_buffer.remove_experiences(to_remove)
-                    lb_used += len(indexes)
-                    lb_removed += len(to_remove)
-                    replay_counter += replay_batch_size
+                    remove_experiences_time += time.time()
+
+                    # lb_used += len(indexes)
+                    # lb_removed += len(to_remove)
+                    # replay_counter += replay_batch_size
 
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
 
+                    append_time -= time.time()
                     for i in indexes:
                         np.append(obses_t, lb_obses_t[i])
                         np.append(actions, lb_actions[i])
                         np.append(rewards, lb_rewards[i])
                         np.append(obses_tp1, lb_obses_tp1[i])
                         np.append(dones, lb_dones[i])
+                    append_time += time.time()
                     weights = np.ones_like(rewards)
                 else:
                     experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
@@ -356,17 +381,16 @@ def learn(env,
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
-                # print(q_values([old_obs]))
                 # if not prioritized_replay:
                 #     if lb_extracted > 0:
                 #         logger.record_tabular('% lb usati su quelli estratti', 100 * lb_used / lb_extracted)
                 #         logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
                 #         logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
                 #         logger.dump_tabular()
-                temp_time = now
-                now = time.time()
-                times.append((now - temp_time, t - temp_steps))
-                temp_steps = t
+                # temp_time = now
+                # now = time.time()
+                # times.append((now - temp_time, t - temp_steps))
+                # temp_steps = t
                 # print("--- %s seconds ---" % (time.time() - start_time))
                 #     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
@@ -379,6 +403,9 @@ def learn(env,
                     save_variables(model_file)
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
+
+        end_time = time.time()
+
         if model_saved:
             if print_freq is not None:
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
@@ -391,11 +418,20 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
         act.save_act(file_path)
-        print('times:')
-        for ti in times:
-            print(ti[0])
-        print('steps:')
-        for ti in times:
-            print(ti[1])
+        # print('times:')
+        # for ti in times:
+        #     print(ti[0])
+        # print('steps:')
+        # for ti in times:
+        #     print(ti[1])
+        tot_time = end_time - start_time
+        logger.record_tabular("% memorize_transition_time", int(100 * memorize_transition_time / tot_time))
+        logger.record_tabular("% compute_lb_time", int(100 * compute_lb_time / tot_time))
+        logger.record_tabular("% sample_time", int(100 * sample_time / tot_time))
+        logger.record_tabular("% test_time", int(100 * test_time / tot_time))
+        logger.record_tabular("% remove_experiences_time", int(100 * remove_experiences_time / tot_time))
+        logger.record_tabular("% append_time", int(100 * append_time / tot_time))
+        logger.record_tabular("% tot lb time", int(100 * memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time / tot_time))
+        logger.dump_tabular()
 
     return act
