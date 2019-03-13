@@ -199,6 +199,8 @@ def learn(env,
     temp_steps = 0
     times = []
 
+    first_batch_training = True
+
     sess = get_session()
     set_global_seeds(seed)
 
@@ -327,8 +329,11 @@ def learn(env,
                 lb_buffer.compute_lb()
                 compute_lb_time += time.time()
 
-            if t > learning_starts and t % train_freq == 0:
+            if t > learning_starts and t % train_freq == 0 and len(lb_buffer) > 0:
                 if not prioritized_replay:
+                    if first_batch_training:
+                        print('first_batch_training at episode:', t)
+                        first_batch_training = False
                     sample_time -= time.time()
                     lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
                     sample_time += time.time()
