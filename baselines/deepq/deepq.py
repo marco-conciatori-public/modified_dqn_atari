@@ -6,6 +6,7 @@ import zipfile
 import cloudpickle
 import numpy as np
 import time
+import datetime
 
 import baselines.common.tf_util as U
 from baselines.common.tf_util import load_variables, save_variables
@@ -430,5 +431,7 @@ def learn(env,
         logger.record_tabular("% append_time", 100 * append_time / tot_time)
         logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time) / tot_time)
         logger.dump_tabular()
+
+        print(str(datetime.timedelta(seconds=tot_time)))
 
     return act
