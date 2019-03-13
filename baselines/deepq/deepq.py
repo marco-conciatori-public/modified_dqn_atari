@@ -197,7 +197,6 @@ def learn(env,
     now = time.time()
     temp_steps = 0
     times = []
-    times.append((0, 0))
 
     sess = get_session()
     set_global_seeds(seed)
@@ -326,7 +325,6 @@ def learn(env,
                 compute_lb_time -= time.time()
                 lb_buffer.compute_lb()
                 compute_lb_time += time.time()
-
 
             if t > learning_starts and t % train_freq == 0:
                 if not prioritized_replay:
