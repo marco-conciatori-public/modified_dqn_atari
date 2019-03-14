@@ -329,6 +329,8 @@ def learn(env,
                 lb_buffer.compute_lb()
                 compute_lb_time += time.time()
 
+            # TODO: rimuovere "len(lb_buffer) > 0" dalle condizioni
+            #       ma eseguire le operazioni relative al lower bound buffer solo se "len(lb_buffer) > 0"
             if t > learning_starts and t % train_freq == 0 and len(lb_buffer) > 0:
                 if not prioritized_replay:
                     if first_batch_training:
