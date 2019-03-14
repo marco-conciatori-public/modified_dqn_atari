@@ -359,11 +359,16 @@ def learn(env,
 
                     append_time -= time.time()
                     for i in indexes:
-                        np.append(obses_t, lb_obses_t[i])
-                        np.append(actions, lb_actions[i])
-                        np.append(rewards, lb_rewards[i])
-                        np.append(obses_tp1, lb_obses_tp1[i])
-                        np.append(dones, lb_dones[i])
+                        obses_t.append(lb_obses_t[i])
+                        actions.append(lb_actions[i])
+                        rewards.append(lb_rewards[i])
+                        obses_tp1.append(lb_obses_tp1[i])
+                        dones.append(lb_dones[i])
+                    obses_t = np.array(obses_t)
+                    actions = np.array(actions)
+                    rewards = np.array(rewards)
+                    obses_tp1 = np.array(obses_tp1)
+                    dones = np.array(dones)
                     append_time += time.time()
                     weights = np.ones_like(rewards)
                 else:
