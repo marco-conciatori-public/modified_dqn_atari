@@ -88,18 +88,18 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         self.gamma = gamma
         self.free_indexes = []
 
-    def add(self, obs_t, action, reward, *unused_args):
+    def add(self, obs_t, action, reward, new_obs, *unused_args):
         if len(self.free_indexes) > 0:
-            self._storage[self.free_indexes.pop()] = (obs_t, action, reward, None, float(True))
+            self._storage[self.free_indexes.pop()] = (obs_t, action, reward, new_obs, float(True))
         else:
-            super().add(obs_t, action, reward, None, float(True))
+            super().add(obs_t, action, reward, new_obs, float(True))
 
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
         for i in idxes:
             data = self._storage[i]
             try:
-                obs_t, action, reward, _, _ = data
+                obs_t, action, reward, new_obs, done = data
             except TypeError as e:
                 print('Errore:', e)
                 print('Esperienza (tupla):', data)
@@ -112,8 +112,8 @@ class LowerBoundReplayBuffer(ReplayBuffer):
             obses_t.append(np.array(obs_t, copy=False))
             actions.append(np.array(action, copy=False))
             rewards.append(reward)
-            obses_tp1.append(None)
-            dones.append(float(True))
+            obses_tp1.append(np.array(new_obs, copy=False))
+            dones.append(done)
 
         return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
         # return obses_t, actions, rewards, obses_tp1, dones
@@ -124,13 +124,13 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         cumulative_reward = 0
         got_reward = False
         while index >= 0:
-            obs_t, action, reward = self._episode_transitions[index]
+            obs_t, action, reward, new_obs = self._episode_transitions[index]
             if reward > 0:
                 got_reward = True
 
             if got_reward:
                 cumulative_reward = cumulative_reward * self.gamma + reward
-                self.add(obs_t, action, cumulative_reward)
+                self.add(obs_t, action, cumulative_reward, new_obs)
             index -= 1
 
         self._episode_transitions = []
@@ -144,8 +144,8 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                 indexes.append(temp_index)
         return self._encode_sample(indexes)
 
-    def memorize_transition(self, obs_t, action, reward):
-        data = (obs_t, action, reward)
+    def memorize_transition(self, obs_t, action, reward, new_obs):
+        data = (obs_t, action, reward, new_obs)
         self._episode_transitions.append(data)
 
     def remove_experiences(self, to_remove):

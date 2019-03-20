@@ -314,7 +314,7 @@ def learn(env,
             replay_buffer.add(obs, action, rew, new_obs, float(done))
 
             memorize_transition_time -= time.time()
-            lb_buffer.memorize_transition(obs, action, rew)
+            lb_buffer.memorize_transition(obs, action, rew, new_obs)
             memorize_transition_time += time.time()
 
             obs = new_obs
