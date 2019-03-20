@@ -321,6 +321,7 @@ def learn(env,
 
             episode_rewards[-1] += rew
             if done:
+                print('new_obs when done:', new_obs)
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
@@ -359,40 +360,40 @@ def learn(env,
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
 
                     # print('len(indexes):', len(indexes))
-                    print('++++++++++++++++++++++++++++++++')
-                    print('lb_obses_t shape:', lb_obses_t.shape)
-                    print('lb_actions shape:', lb_actions.shape)
-                    print('lb_rewards shape:', lb_rewards.shape)
-                    print('lb_obses_tp1 shape:', lb_obses_tp1.shape)
-                    print('lb_dones shape:', lb_dones.shape)
+                    # print('++++++++++++++++++++++++++++++++')
+                    # print('lb_obses_t shape:', lb_obses_t.shape)
+                    # print('lb_actions shape:', lb_actions.shape)
+                    # print('lb_rewards shape:', lb_rewards.shape)
+                    # print('lb_obses_tp1 shape:', lb_obses_tp1.shape)
+                    # print('lb_dones shape:', lb_dones.shape)
+                    #
+                    # print('obses_t shape:', obses_t.shape)
+                    # print('actions shape:', actions.shape)
+                    # print('rewards shape:', rewards.shape)
+                    # print('obses_tp1 shape:', obses_tp1.shape)
+                    # print('dones shape:', dones.shape)
+                    # print('weights shape:', weights.shape)
 
-                    print('obses_t shape:', obses_t.shape)
-                    print('actions shape:', actions.shape)
-                    print('rewards shape:', rewards.shape)
-                    print('obses_tp1 shape:', obses_tp1.shape)
-                    print('dones shape:', dones.shape)
-                    print('weights shape:', weights.shape)
-
-                    append_time -= time.time()
-                    for i in indexes:
+                    # append_time -= time.time()
+                    # for i in indexes:
                         # obses_t.append(lb_obses_t[i])
                         # actions.append(lb_actions[i])
                         # rewards.append(lb_rewards[i])
                         # obses_tp1.append(lb_obses_tp1[i])
                         # dones.append(lb_dones[i])
 
-                        obses_t = np.append(obses_t, lb_obses_t[i])
-                        actions = np.append(actions, lb_actions[i])
-                        rewards = np.append(rewards, lb_rewards[i])
-                        obses_tp1 = np.append(obses_tp1, lb_obses_tp1[i])
-                        dones = np.append(dones, lb_dones[i])
+                        # obses_t = np.append(obses_t, lb_obses_t[i])
+                        # actions = np.append(actions, lb_actions[i])
+                        # rewards = np.append(rewards, lb_rewards[i])
+                        # obses_tp1 = np.append(obses_tp1, lb_obses_tp1[i])
+                        # dones = np.append(dones, lb_dones[i])
 
                     # obses_t = np.array(obses_t)
                     # actions = np.array(actions)
                     # rewards = np.array(rewards)
                     # obses_tp1 = np.array(obses_tp1)
                     # dones = np.array(dones)
-                    append_time += time.time()
+                    # append_time += time.time()
                     weights = np.ones_like(rewards)
                 else:
                     experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
