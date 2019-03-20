@@ -366,6 +366,13 @@ def learn(env,
                     print('lb_obses_tp1 shape:', lb_obses_tp1.shape)
                     print('lb_dones shape:', lb_dones.shape)
 
+                    print('obses_t shape:', obses_t.shape)
+                    print('actions shape:', actions.shape)
+                    print('rewards shape:', rewards.shape)
+                    print('obses_tp1 shape:', obses_tp1.shape)
+                    print('dones shape:', dones.shape)
+                    print('weights shape:', weights.shape)
+
                     append_time -= time.time()
                     for i in indexes:
                         # obses_t.append(lb_obses_t[i])
