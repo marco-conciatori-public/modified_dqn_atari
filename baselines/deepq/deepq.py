@@ -342,7 +342,6 @@ def learn(env,
 
                     # lb_extracted += len(lb_obses_t)
                     test_time -= time.time()
-                    # estimated_rewards = q_values(lb_obses_t)
                     estimated_rewards = q_values(np.array(lb_obses_t))
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
                     test_time += time.time()
@@ -359,30 +358,17 @@ def learn(env,
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
 
                     # print('len(indexes):', len(indexes))
-                    print('++++++++++++++++++++++++++++++++')
-                    # print('lb_obses_t shape:', lb_obses_t.shape)
-                    # print('lb_actions shape:', lb_actions.shape)
-                    # print('lb_rewards shape:', lb_rewards.shape)
-                    # print('lb_obses_tp1 shape:', lb_obses_tp1.shape)
-                    # print('lb_dones shape:', lb_dones.shape)
-                    #
-                    # print('obses_t shape:', obses_t.shape)
-                    # print('actions shape:', actions.shape)
-                    # print('rewards shape:', rewards.shape)
-                    # print('obses_tp1 shape:', obses_tp1.shape)
-                    # print('dones shape:', dones.shape)
-
-                    print('lb_obses_t shape:', np.shape(lb_obses_t))
-                    print('lb_actions shape:', np.shape(lb_actions))
-                    print('lb_rewards shape:', np.shape(lb_rewards))
-                    print('lb_obses_tp1 shape:', np.shape(lb_obses_tp1))
-                    print('lb_dones shape:', np.shape(lb_dones))
-
-                    print('obses_t shape:', np.shape(obses_t))
-                    print('actions shape:', np.shape(actions))
-                    print('rewards shape:', np.shape(rewards))
-                    print('obses_tp1 shape:', np.shape(obses_tp1))
-                    print('dones shape:', np.shape(dones))
+                    # print('++++++++++++++++++++++++++++++++')
+                    # print('lb_obses_t shape:', np.shape(lb_obses_t))
+                    # print('lb_actions shape:', np.shape(lb_actions))
+                    # print('lb_rewards shape:', np.shape(lb_rewards))
+                    # print('lb_obses_tp1 shape:', np.shape(lb_obses_tp1))
+                    # print('lb_dones shape:', np.shape(lb_dones))
+                    # print('obses_t shape:', np.shape(obses_t))
+                    # print('actions shape:', np.shape(actions))
+                    # print('rewards shape:', np.shape(rewards))
+                    # print('obses_tp1 shape:', np.shape(obses_tp1))
+                    # print('dones shape:', np.shape(dones))
 
                     append_time -= time.time()
                     for i in indexes:
@@ -409,12 +395,12 @@ def learn(env,
                     experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
                     (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
 
-                print('obses_t shape:', obses_t.shape)
-                print('actions shape:', actions.shape)
-                print('rewards shape:', rewards.shape)
-                print('obses_tp1 shape:', obses_tp1.shape)
-                print('dones shape:', dones.shape)
-                print('weights shape:', weights.shape)
+                # print('obses_t shape:', obses_t.shape)
+                # print('actions shape:', actions.shape)
+                # print('rewards shape:', rewards.shape)
+                # print('obses_tp1 shape:', obses_tp1.shape)
+                # print('dones shape:', dones.shape)
+                # print('weights shape:', weights.shape)
                 td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 if prioritized_replay:
                     new_priorities = np.abs(td_errors) + prioritized_replay_eps
