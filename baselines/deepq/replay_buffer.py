@@ -40,8 +40,8 @@ class ReplayBuffer(object):
             rewards.append(reward)
             obses_tp1.append(np.array(obs_tp1, copy=False))
             dones.append(done)
-        return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
-        # return obses_t, actions, rewards, obses_tp1, dones
+        # return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
+        return obses_t, actions, rewards, obses_tp1, dones
 
     def sample(self, batch_size):
         """Sample a batch of experiences.
@@ -115,9 +115,8 @@ class LowerBoundReplayBuffer(ReplayBuffer):
             obses_tp1.append(np.array(new_obs, copy=False))
             dones.append(done)
 
-        return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
-        # return obses_t, actions, rewards, obses_tp1, dones
-        # return np.array(obses_t), np.array(actions), np.array(rewards)
+        # return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
+        return obses_t, actions, rewards, obses_tp1, dones
 
     def compute_lb(self):
         index = len(self._episode_transitions) - 1
