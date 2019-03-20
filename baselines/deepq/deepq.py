@@ -375,6 +375,12 @@ def learn(env,
                     experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
                     (obses_t, actions, rewards, obses_tp1, dones, weights, batch_idxes) = experience
 
+                print('obses_t shape:', obses_t.shape)
+                print('actions shape:', actions.shape)
+                print('rewards shape:', rewards.shape)
+                print('obses_tp1 shape:', obses_tp1.shape)
+                print('dones shape:', dones.shape)
+                print('weights shape:', weights.shape)
                 td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 if prioritized_replay:
                     new_priorities = np.abs(td_errors) + prioritized_replay_eps
