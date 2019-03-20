@@ -359,12 +359,12 @@ def learn(env,
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
 
                     # print('len(indexes):', len(indexes))
-                    # print('obses_t shape:', obses_t.shape)
-                    # print('actions shape:', actions.shape)
-                    # print('rewards shape:', rewards.shape)
-                    # print('obses_tp1 shape:', obses_tp1.shape)
-                    # print('dones shape:', dones.shape)
-                    # print('weights shape:', weights.shape)
+                    print('++++++++++++++++++++++++++++++++')
+                    print('lb_obses_t shape:', lb_obses_t.shape)
+                    print('lb_actions shape:', lb_actions.shape)
+                    print('lb_rewards shape:', lb_rewards.shape)
+                    print('lb_obses_tp1 shape:', lb_obses_tp1.shape)
+                    print('lb_dones shape:', lb_dones.shape)
 
                     append_time -= time.time()
                     for i in indexes:
