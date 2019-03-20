@@ -373,16 +373,16 @@ def learn(env,
                     # print('dones shape:', dones.shape)
 
                     print('lb_obses_t shape:', np.shape(lb_obses_t))
-                    print('lb_actions shape:', np.shape(lb_actions.shape))
-                    print('lb_rewards shape:', np.shape(lb_rewards.shape))
-                    print('lb_obses_tp1 shape:', np.shape(lb_obses_tp1.shape))
-                    print('lb_dones shape:', np.shape(lb_dones.shape))
+                    print('lb_actions shape:', np.shape(lb_actions))
+                    print('lb_rewards shape:', np.shape(lb_rewards))
+                    print('lb_obses_tp1 shape:', np.shape(lb_obses_tp1))
+                    print('lb_dones shape:', np.shape(lb_dones))
 
-                    print('obses_t shape:', np.shape(obses_t.shape))
-                    print('actions shape:', np.shape(actions.shape))
-                    print('rewards shape:', np.shape(rewards.shape))
-                    print('obses_tp1 shape:', np.shape(obses_tp1.shape))
-                    print('dones shape:', np.shape(dones.shape))
+                    print('obses_t shape:', np.shape(obses_t))
+                    print('actions shape:', np.shape(actions))
+                    print('rewards shape:', np.shape(rewards))
+                    print('obses_tp1 shape:', np.shape(obses_tp1))
+                    print('dones shape:', np.shape(dones))
 
                     append_time -= time.time()
                     for i in indexes:
