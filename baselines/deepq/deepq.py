@@ -342,7 +342,8 @@ def learn(env,
 
                     # lb_extracted += len(lb_obses_t)
                     test_time -= time.time()
-                    estimated_rewards = q_values(np.array(lb_obses_t))
+                    estimated_rewards = q_values(lb_obses_t)
+                    # estimated_rewards = q_values(np.array(lb_obses_t))
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
                     test_time += time.time()
 
@@ -364,11 +365,11 @@ def learn(env,
                         rewards.append(lb_rewards[i])
                         obses_tp1.append(lb_obses_tp1[i])
                         dones.append(lb_dones[i])
-                    obses_t = np.array(obses_t)
-                    actions = np.array(actions)
-                    rewards = np.array(rewards)
-                    obses_tp1 = np.array(obses_tp1)
-                    dones = np.array(dones)
+                    # obses_t = np.array(obses_t)
+                    # actions = np.array(actions)
+                    # rewards = np.array(rewards)
+                    # obses_tp1 = np.array(obses_tp1)
+                    # dones = np.array(dones)
                     append_time += time.time()
                     weights = np.ones_like(rewards)
                 else:
