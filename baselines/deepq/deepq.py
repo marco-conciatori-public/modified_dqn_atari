@@ -360,11 +360,18 @@ def learn(env,
 
                     append_time -= time.time()
                     for i in indexes:
-                        obses_t.append(lb_obses_t[i])
-                        actions.append(lb_actions[i])
-                        rewards.append(lb_rewards[i])
-                        obses_tp1.append(lb_obses_tp1[i])
-                        dones.append(lb_dones[i])
+                        # obses_t.append(lb_obses_t[i])
+                        # actions.append(lb_actions[i])
+                        # rewards.append(lb_rewards[i])
+                        # obses_tp1.append(lb_obses_tp1[i])
+                        # dones.append(lb_dones[i])
+
+                        np.append(obses_t, lb_obses_t[i])
+                        np.append(actions, lb_actions[i])
+                        np.append(rewards, lb_rewards[i])
+                        np.append(obses_tp1, lb_obses_tp1[i])
+                        np.append(dones, lb_dones[i])
+
                     # obses_t = np.array(obses_t)
                     # actions = np.array(actions)
                     # rewards = np.array(rewards)
