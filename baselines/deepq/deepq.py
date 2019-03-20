@@ -321,7 +321,8 @@ def learn(env,
 
             episode_rewards[-1] += rew
             if done:
-                print('new_obs when done:', new_obs)
+                print('new_obs when done 1:', new_obs.shape)
+                print('new_obs when done 2:', np.shape(new_obs))
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
