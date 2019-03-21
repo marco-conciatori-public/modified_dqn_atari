@@ -199,6 +199,8 @@ def learn(env,
     temp_steps = 0
     times = []
 
+    steps_score_data = []
+
     first_batch_training = True
 
     sess = get_session()
@@ -440,6 +442,7 @@ def learn(env,
                     save_variables(model_file)
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
+                    steps_score_data.append((t, saved_mean_reward))
 
         tot_time += time.time()
 
@@ -458,9 +461,16 @@ def learn(env,
         print('times:')
         for ti in times:
             print(ti[0])
-        print('steps:')
+        print('steps_times:')
         for ti in times:
             print(ti[1])
+
+        print('steps_score:')
+        for el in steps_score_data:
+            print(el[0])
+        print('score:')
+        for el in steps_score_data:
+            print(el[1])
         logger.record_tabular("% memorize_transition_time", 100 * memorize_transition_time / tot_time)
         logger.record_tabular("% compute_lb_time", 100 * compute_lb_time / tot_time)
         logger.record_tabular("% sample_time", 100 * sample_time / tot_time)
