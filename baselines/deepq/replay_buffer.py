@@ -134,13 +134,21 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
         self._episode_transitions = []
 
+    # def sample(self, batch_size):
+    #     indexes = []
+    #     max_index = len(self._storage) - 1
+    #     while len(indexes) < batch_size:
+    #         temp_index = random.randint(0, max_index)
+    #         if temp_index not in self.free_indexes and temp_index not in indexes:
+    #             indexes.append(temp_index)
+    #     return self._encode_sample(indexes)
+
     def sample(self, batch_size):
-        indexes = []
-        max_index = len(self._storage) - 1
-        while len(indexes) < batch_size:
-            temp_index = random.randint(0, max_index)
-            if temp_index not in self.free_indexes and temp_index not in indexes:
-                indexes.append(temp_index)
+        to_choose_indexes = []
+        for i in range(len(self._storage) - 1):
+            if i not in self.free_indexes:
+                to_choose_indexes.append(i)
+        indexes = random.sample(to_choose_indexes, batch_size)
         return self._encode_sample(indexes)
 
     def memorize_transition(self, obs_t, action, reward, new_obs):
