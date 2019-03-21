@@ -480,6 +480,6 @@ def learn(env,
         logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time) / tot_time)
         logger.dump_tabular()
 
-        print(str(datetime.timedelta(seconds=tot_time)))
+        print('total time:', str(datetime.timedelta(seconds=tot_time)))
 
     return act
