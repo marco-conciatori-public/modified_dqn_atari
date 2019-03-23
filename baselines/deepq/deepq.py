@@ -206,7 +206,7 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
-    writer = tf.summary.FileWriter("./log", sess.graph)
+    writer = tf.summary.FileWriter("././log", graph=sess.graph)
 
     q_func = build_q_func(network, **network_kwargs)
 
