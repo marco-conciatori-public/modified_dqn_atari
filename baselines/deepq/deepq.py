@@ -206,6 +206,8 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
+    writer = tf.summary.FileWriter("/tmp/log/...", sess.graph)
+
     q_func = build_q_func(network, **network_kwargs)
 
     # capture the shape outside the closure so that the env object is not serialized
@@ -481,5 +483,7 @@ def learn(env,
         logger.dump_tabular()
 
         print('total time:', str(datetime.timedelta(seconds=tot_time)))
+
+        writer.close()
 
     return act
