@@ -208,9 +208,9 @@ def learn(env,
 
 
     log_dir = '/content/ml-dqn-atari/log'
-    writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
-    print('expected log_dir:', log_dir)
-    print('log_dir:', writer.get_logdir())
+    # writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+    # print('expected log_dir:', log_dir)
+    # print('log_dir:', writer.get_logdir())
 
     q_func = build_q_func(network, **network_kwargs)
 
@@ -295,6 +295,11 @@ def learn(env,
         test_time = 0
         remove_experiences_time = 0
         append_time = 0
+
+        writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+        print('expected log_dir:', log_dir)
+        print('log_dir:', writer.get_logdir())
+
         for t in range(total_timesteps):
             if callback is not None:
                 if callback(locals(), globals()):
