@@ -493,8 +493,8 @@ def learn(env,
 
         print('total time:', str(datetime.timedelta(seconds=tot_time)))
 
-        writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
-        # writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph(), flush_secs=60)
+        # writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+        writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph(), flush_secs=60)
         print('expected log_dir:', log_dir)
         print('log_dir:', writer.get_logdir())
 
