@@ -206,6 +206,8 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
+    print(os.getcwd())
+
     writer = tf.summary.FileWriter("../log", graph=sess.graph)
 
     q_func = build_q_func(network, **network_kwargs)
@@ -331,6 +333,7 @@ def learn(env,
 
                 compute_lb_time -= time.time()
                 lb_buffer.compute_lb()
+                # lb_buffer.compute_lb(q_values)
                 compute_lb_time += time.time()
 
             # TODO: rimuovere "len(lb_buffer) > 0" dalle condizioni

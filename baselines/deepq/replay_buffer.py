@@ -134,6 +134,26 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
         self._episode_transitions = []
 
+    # def compute_lb(self, q_values):
+    #     index = len(self._episode_transitions) - 1
+    #     cumulative_reward = 0
+    #     got_reward = False
+    #     while index >= 0:
+    #         obs_t, action, reward, new_obs = self._episode_transitions[index]
+    #         if reward > 0:
+    #             got_reward = True
+    #
+    #         if got_reward:
+    #             cumulative_reward = cumulative_reward * self.gamma + reward
+    #             estimated_reward = q_values(np.array(obs_t))
+    #             print('estimated_reward:', estimated_reward)
+    #             if test_single_exp(action, cumulative_reward, estimated_reward)
+    #
+    #             self.add(obs_t, action, cumulative_reward, new_obs)
+    #         index -= 1
+    #
+    #     self._episode_transitions = []
+
     def sample(self, batch_size):
         indexes = []
         max_index = len(self._storage) - 1
@@ -299,3 +319,8 @@ def test(actions, lb_rewards, estimated_rewards):
             to_remove.append(i)
 
     return indexes, to_remove
+
+
+def test_single_exp(action, lb_reward, estimated_reward):
+    estimated_reward = estimated_reward[action]
+    return lb_reward > estimated_reward
