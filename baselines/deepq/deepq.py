@@ -206,7 +206,6 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
-
     log_dir = '/content/ml-dqn-atari/log'
     # writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
     # print('expected log_dir:', log_dir)
@@ -296,9 +295,9 @@ def learn(env,
         remove_experiences_time = 0
         append_time = 0
 
-        writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
-        print('expected log_dir:', log_dir)
-        print('log_dir:', writer.get_logdir())
+        # writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+        # print('expected log_dir:', log_dir)
+        # print('log_dir:', writer.get_logdir())
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -493,6 +492,11 @@ def learn(env,
         logger.dump_tabular()
 
         print('total time:', str(datetime.timedelta(seconds=tot_time)))
+
+        writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+        # writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph(), flush_secs=60)
+        print('expected log_dir:', log_dir)
+        print('log_dir:', writer.get_logdir())
 
         writer.close()
 
