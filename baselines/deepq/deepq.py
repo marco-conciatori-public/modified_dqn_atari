@@ -206,9 +206,11 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
-    print(os.getcwd())
+    print('current dir:', os.getcwd())
+    print('expected log dir:',  os.path.join(os.getcwd(), "../log"))
 
     writer = tf.summary.FileWriter("../log", graph=sess.graph)
+    print('log dir:', writer.get_logdir())
 
     q_func = build_q_func(network, **network_kwargs)
 
