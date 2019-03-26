@@ -209,7 +209,8 @@ def learn(env,
 
     log_dir = '/content/ml-dqn-atari/log'
     writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
-    writer.get_logdir()
+    print('expected log_dir:', log_dir)
+    print('log_dir:', writer.get_logdir())
 
     q_func = build_q_func(network, **network_kwargs)
 
