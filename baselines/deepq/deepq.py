@@ -206,12 +206,10 @@ def learn(env,
     sess = get_session()
     set_global_seeds(seed)
 
-    print('current dir:', os.getcwd())
-    print('absolute current dir:', os.path.abspath(os.getcwd()))
-    print('expected log dir:',  os.path.abspath("./log"))
 
-    writer = tf.summary.FileWriter("./log", graph=sess.graph)
-    print('log dir:', writer.get_logdir())
+    log_dir = '/content/ml-dqn-atari/log'
+    writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+    writer.get_logdir()
 
     q_func = build_q_func(network, **network_kwargs)
 
