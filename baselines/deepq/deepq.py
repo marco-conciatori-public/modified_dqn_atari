@@ -234,6 +234,7 @@ def learn(env,
         'q_func': q_func,
         'num_actions': env.action_space.n,
     }
+    print('num_actions:', act_params['num_actions'])
 
     act = ActWrapper(act, act_params)
 
