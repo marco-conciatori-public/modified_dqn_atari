@@ -354,6 +354,8 @@ def learn(env,
                     # lb_extracted += len(lb_obses_t)
                     test_time -= time.time()
                     estimated_rewards = q_values(np.array(lb_obses_t))
+                    print('main')
+                    print('estimated_rewards:', estimated_rewards)
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
                     test_time += time.time()
 
