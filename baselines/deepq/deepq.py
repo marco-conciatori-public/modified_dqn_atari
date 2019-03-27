@@ -291,9 +291,12 @@ def learn(env,
         test_time = 0
         remove_experiences_time = 0
         append_time = 0
+        log_time = 0
 
         # writer = tf.summary.FileWriter(log_dir, graph=sess.graph, flush_secs=60)
+        log_time -= time.time()
         writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph(), flush_secs=60)
+        log_time += time.time()
         # print('+++++++++++++++ expected log_dir:', log_dir)
         # print('+++++++++++++++ log_dir:', writer.get_logdir())
 
