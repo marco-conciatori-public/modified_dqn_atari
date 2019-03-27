@@ -159,7 +159,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
             index -= 1
 
         estimated_rewards = q_values(np.array(old_observations))
-        indexes, _ = test(actions, rewards, estimated_rewards)
+        indexes, _ = test(np.array(actions), np.array(rewards), np.array(estimated_rewards))
 
         for i in indexes:
             self.add(old_observations[i], actions[i], rewards[i], new_observations[i])
