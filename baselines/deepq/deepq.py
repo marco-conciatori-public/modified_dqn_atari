@@ -289,6 +289,7 @@ def learn(env,
         compute_lb_time = 0
         sample_time = 0
         test_time = 0
+        q_val_time = 0
         remove_experiences_time = 0
         append_time = 0
         log_time = 0
@@ -355,8 +356,10 @@ def learn(env,
                     sample_time += time.time()
 
                     # lb_extracted += len(lb_obses_t)
-                    test_time -= time.time()
+                    q_val_time -= time.time()
                     estimated_rewards = q_values(np.array(lb_obses_t))
+                    q_val_time += time.time()
+                    test_time -= time.time()
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
                     test_time += time.time()
 
@@ -487,10 +490,11 @@ def learn(env,
         logger.record_tabular("% compute_lb_time", 100 * compute_lb_time / tot_time)
         logger.record_tabular("% sample_time", 100 * sample_time / tot_time)
         logger.record_tabular("% test_time", 100 * test_time / tot_time)
+        logger.record_tabular("% q_val_time", 100 * q_val_time / tot_time)
         logger.record_tabular("% remove_experiences_time", 100 * remove_experiences_time / tot_time)
         logger.record_tabular("% append_time", 100 * append_time / tot_time)
         logger.record_tabular("% log_time", 100 * log_time / tot_time)
-        logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time) / tot_time)
+        logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + q_val_time + test_time + remove_experiences_time + append_time) / tot_time)
         logger.dump_tabular()
 
         print('total time:', str(datetime.timedelta(seconds=tot_time)))
