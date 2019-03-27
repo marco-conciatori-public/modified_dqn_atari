@@ -336,8 +336,8 @@ def learn(env,
                 reset = True
 
                 compute_lb_time -= time.time()
-                lb_buffer.compute_lb()
-                # lb_buffer.compute_lb(q_values)
+                # lb_buffer.compute_lb()
+                lb_buffer.compute_lb(q_values)
                 compute_lb_time += time.time()
 
             # TODO: rimuovere "len(lb_buffer) > 0" dalle condizioni
@@ -357,9 +357,9 @@ def learn(env,
                     indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
                     test_time += time.time()
 
-                    remove_experiences_time -= time.time()
-                    lb_buffer.remove_experiences(to_remove)
-                    remove_experiences_time += time.time()
+                    # remove_experiences_time -= time.time()
+                    # lb_buffer.remove_experiences(to_remove)
+                    # remove_experiences_time += time.time()
 
                     # lb_used += len(indexes)
                     # lb_removed += len(to_remove)

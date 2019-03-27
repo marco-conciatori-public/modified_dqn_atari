@@ -86,13 +86,13 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         super().__init__(size)
         self._episode_transitions = []
         self.gamma = gamma
-        self.free_indexes = []
+        # self.free_indexes = []
 
     def add(self, obs_t, action, reward, new_obs, *unused_args):
-        if len(self.free_indexes) > 0:
-            self._storage[self.free_indexes.pop()] = (obs_t, action, reward, new_obs, float(True))
-        else:
-            super().add(obs_t, action, reward, new_obs, float(True))
+        # if len(self.free_indexes) > 0:
+        #     self._storage[self.free_indexes.pop()] = (obs_t, action, reward, new_obs, float(True))
+        # else:
+        super().add(obs_t, action, reward, new_obs, float(True))
 
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
@@ -105,7 +105,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                 print('Esperienza (tupla):', data)
                 print('indice esp:', i)
                 print('puntatore ciclico:', self._next_idx)
-                print('free_indexes:', self.free_indexes)
+                # print('free_indexes:', self.free_indexes)
                 print('len(_storage):', len(self._storage))
                 raise SystemExit
 
@@ -118,23 +118,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         # return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones)
         return obses_t, actions, rewards, obses_tp1, dones
 
-    def compute_lb(self):
-        index = len(self._episode_transitions) - 1
-        cumulative_reward = 0
-        got_reward = False
-        while index >= 0:
-            obs_t, action, reward, new_obs = self._episode_transitions[index]
-            if reward > 0:
-                got_reward = True
-
-            if got_reward:
-                cumulative_reward = cumulative_reward * self.gamma + reward
-                self.add(obs_t, action, cumulative_reward, new_obs)
-            index -= 1
-
-        self._episode_transitions = []
-
-    # def compute_lb(self, q_values):
+    # def compute_lb(self):
     #     index = len(self._episode_transitions) - 1
     #     cumulative_reward = 0
     #     got_reward = False
@@ -145,21 +129,35 @@ class LowerBoundReplayBuffer(ReplayBuffer):
     #
     #         if got_reward:
     #             cumulative_reward = cumulative_reward * self.gamma + reward
-    #             estimated_reward = q_values(np.array(obs_t))
-    #             print('estimated_reward:', estimated_reward)
-    #             if test_single_exp(action, cumulative_reward, estimated_reward)
-    #
     #             self.add(obs_t, action, cumulative_reward, new_obs)
     #         index -= 1
     #
     #     self._episode_transitions = []
+
+    def compute_lb(self, q_values):
+        index = len(self._episode_transitions) - 1
+        cumulative_reward = 0
+        got_reward = False
+        while index >= 0:
+            obs_t, action, reward, new_obs = self._episode_transitions[index]
+            if reward > 0:
+                got_reward = True
+
+            if got_reward:
+                cumulative_reward = cumulative_reward * self.gamma + reward
+                if test_single_exp(action, cumulative_reward, q_values, obs_t):
+                    self.add(obs_t, action, cumulative_reward, new_obs)
+            index -= 1
+
+        self._episode_transitions = []
 
     def sample(self, batch_size):
         indexes = []
         max_index = len(self._storage) - 1
         while len(indexes) < batch_size:
             temp_index = random.randint(0, max_index)
-            if temp_index not in self.free_indexes and temp_index not in indexes:
+            # if temp_index not in self.free_indexes and temp_index not in indexes:
+            if temp_index not in indexes:
                 indexes.append(temp_index)
         return self._encode_sample(indexes)
 
@@ -175,10 +173,10 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         data = (obs_t, action, reward, new_obs)
         self._episode_transitions.append(data)
 
-    def remove_experiences(self, to_remove):
-        for i in to_remove:
-            self._storage[i] = None
-            self.free_indexes.append(i)
+    # def remove_experiences(self, to_remove):
+    #     for i in to_remove:
+    #         self._storage[i] = None
+    #         self.free_indexes.append(i)
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
@@ -321,6 +319,9 @@ def test(actions, lb_rewards, estimated_rewards):
     return indexes, to_remove
 
 
-def test_single_exp(action, lb_reward, estimated_reward):
+def test_single_exp(action, lb_reward, q_values, obs_t):
+    estimated_reward = q_values(np.array(obs_t))
+    print('estim_rew_all_actions:', estimated_reward)
     estimated_reward = estimated_reward[action]
+    print('estimated_reward:', estimated_reward)
     return lb_reward > estimated_reward
