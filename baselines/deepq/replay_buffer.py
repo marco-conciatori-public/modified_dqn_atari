@@ -138,10 +138,6 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         index = len(self._episode_transitions) - 1
         cumulative_reward = 0
         got_reward = False
-        actions = []
-        rewards = []
-        old_observations = []
-        new_observations = []
         while index >= 0:
             obs_t, action, reward, new_obs = self._episode_transitions[index]
             if reward > 0:
@@ -149,20 +145,10 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
             if got_reward:
                 cumulative_reward = cumulative_reward * self.gamma + reward
-                # if test_single_exp(action, cumulative_reward, q_values, obs_t):
-                #     self.add(obs_t, action, cumulative_reward, new_obs)
+                if test_single_exp(action, cumulative_reward, q_values, obs_t):
+                    self.add(obs_t, action, cumulative_reward, new_obs)
 
-                actions.append(np.array(action, copy=False))
-                rewards.append(cumulative_reward)
-                old_observations.append(np.array(obs_t, copy=False))
-                new_observations.append(np.array(new_obs, copy=False))
             index -= 1
-
-        estimated_rewards = q_values(np.array(old_observations))
-        indexes, _ = test(np.array(actions), np.array(rewards), np.array(estimated_rewards))
-
-        for i in indexes:
-            self.add(old_observations[i], actions[i], rewards[i], new_observations[i])
 
         self._episode_transitions = []
 
