@@ -152,15 +152,13 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                 # if test_single_exp(action, cumulative_reward, q_values, obs_t):
                 #     self.add(obs_t, action, cumulative_reward, new_obs)
 
-                actions.append(action)
+                actions.append(np.array(action, copy=False))
                 rewards.append(cumulative_reward)
-                old_observations.append(obs_t)
-                new_observations.append(new_obs)
+                old_observations.append(np.array(obs_t, copy=False))
+                new_observations.append(np.array(new_obs, copy=False))
             index -= 1
 
         estimated_rewards = q_values(np.array(old_observations))
-        print('compute_lb')
-        print('estimated_rewards:', estimated_rewards)
         indexes, _ = test(actions, rewards, estimated_rewards)
 
         for i in indexes:
@@ -181,8 +179,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
     # def sample(self, batch_size):
     #     to_choose_indexes = []
     #     for i in range(len(self._storage) - 1):
-    #         if i not in self.free_indexes:
-    #             to_choose_indexes.append(i)
+    #         to_choose_indexes.append(i)
     #     indexes = random.sample(to_choose_indexes, batch_size)
     #     return self._encode_sample(indexes)
 
@@ -336,9 +333,9 @@ def test(actions, lb_rewards, estimated_rewards):
     return indexes, to_remove
 
 
-# def test_single_exp(action, lb_reward, q_values, obs_t):
-#     estimated_reward = q_values(np.array([obs_t]))
-#     print('estim_rew_all_actions:', estimated_reward)
-#     estimated_reward = estimated_reward[action]
-#     print('estimated_reward:', estimated_reward)
-#     return lb_reward > estimated_reward
+def test_single_exp(action, lb_reward, q_values, obs_t):
+    estimated_reward = q_values(np.array([obs_t]))
+    print('estim_rew_all_actions:', estimated_reward)
+    estimated_reward = estimated_reward[action]
+    print('estimated_reward:', estimated_reward)
+    return lb_reward > estimated_reward
