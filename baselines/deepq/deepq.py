@@ -489,6 +489,7 @@ def learn(env,
         logger.record_tabular("% test_time", 100 * test_time / tot_time)
         logger.record_tabular("% remove_experiences_time", 100 * remove_experiences_time / tot_time)
         logger.record_tabular("% append_time", 100 * append_time / tot_time)
+        logger.record_tabular("% log_time", 100 * log_time / tot_time)
         logger.record_tabular("% tot lb time", 100 * (memorize_transition_time + compute_lb_time + sample_time + test_time + remove_experiences_time + append_time) / tot_time)
         logger.dump_tabular()
 
