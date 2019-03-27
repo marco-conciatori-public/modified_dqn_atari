@@ -320,7 +320,7 @@ def test(actions, lb_rewards, estimated_rewards):
 
 
 def test_single_exp(action, lb_reward, q_values, obs_t):
-    estimated_reward = q_values(np.array([obs_t]))
+    estimated_reward = q_values(np.array(obs_t))
     print('estim_rew_all_actions:', estimated_reward)
     print('action:', action)
     estimated_reward = estimated_reward[action]
