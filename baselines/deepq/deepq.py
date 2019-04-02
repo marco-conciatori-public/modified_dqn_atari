@@ -265,10 +265,9 @@ def learn(env,
     obs = env.reset()
     reset = True
 
-    # lb_extracted = 0
-    # lb_used = 0
-    # lb_removed = 0
-    # replay_counter = 0
+    lb_extracted = 0
+    lb_used = 0
+    replay_counter = 0
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -355,7 +354,7 @@ def learn(env,
                     lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
                     sample_time += time.time()
 
-                    # lb_extracted += len(lb_obses_t)
+                    lb_extracted += len(lb_obses_t)
                     q_val_time -= time.time()
                     estimated_rewards = q_values(np.array(lb_obses_t))
                     q_val_time += time.time()
@@ -367,9 +366,8 @@ def learn(env,
                     # lb_buffer.remove_experiences(to_remove)
                     # remove_experiences_time += time.time()
 
-                    # lb_used += len(indexes)
-                    # lb_removed += len(to_remove)
-                    # replay_counter += replay_batch_size
+                    lb_used += len(indexes)
+                    replay_counter += replay_batch_size
 
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
@@ -394,12 +392,6 @@ def learn(env,
                         rewards.append(lb_rewards[i])
                         obses_tp1.append(lb_obses_tp1[i])
                         dones.append(lb_dones[i])
-
-                        # obses_t = np.append(obses_t, lb_obses_t[i])
-                        # actions = np.append(actions, lb_actions[i])
-                        # rewards = np.append(rewards, lb_rewards[i])
-                        # obses_tp1 = np.append(obses_tp1, lb_obses_tp1[i])
-                        # dones = np.append(dones, lb_dones[i])
 
                     obses_t = np.array(obses_t)
                     actions = np.array(actions)
@@ -434,13 +426,13 @@ def learn(env,
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
+                if not prioritized_replay:
+                    if lb_extracted > 0:
+                        logger.record_tabular('% lb usati / estratti', 100 * lb_used / lb_extracted)
+                        logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
+                        logger.dump_tabular()
                 logger.dump_tabular()
-                # if not prioritized_replay:
-                #     if lb_extracted > 0:
-                #         logger.record_tabular('% lb usati su quelli estratti', 100 * lb_used / lb_extracted)
-                #         logger.record_tabular('% lb usati su totale replay usati', 100 * lb_used / replay_counter)
-                #         logger.record_tabular('% lb rimossi su quelli estratti', 100 * lb_removed / lb_extracted)
-                #         logger.dump_tabular()
+
                 temp_time = now
                 now = time.time()
                 times.append((now - temp_time, t - temp_steps))
