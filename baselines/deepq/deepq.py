@@ -428,7 +428,6 @@ def learn(env,
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 if not prioritized_replay:
                     if lb_extracted > 0:
-                        logger.record_tabular('% lb usati / estratti', 100 * lb_used / lb_extracted)
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
