@@ -456,10 +456,25 @@ def learn(env,
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
 
+        readable_total_timesteps = total_timesteps
+        num_m = 0
+        num_k = 0
+        while readable_total_timesteps % 1000000 == 0:
+            num_m += 1
+            readable_total_timesteps /= 1000000
+        if readable_total_timesteps % 1000 == 0:
+            num_k += 1
+            readable_total_timesteps /= 1000
+        readable_total_timesteps = str(readable_total_timesteps)
+        for i in range(num_k):
+            readable_total_timesteps += 'K'
+        for i in range(num_m):
+            readable_total_timesteps += 'M'
+
         if model_saved:
-            file_name = env.spec.id + '_rew' + str(saved_mean_reward) + '_steps' + str(total_timesteps) + '.pkl'
+            file_name = env.spec.id + '_rew' + str(saved_mean_reward) + '_steps' + str(readable_total_timesteps) + '.pkl'
         else:
-            file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(total_timesteps) + '.pkl'
+            file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
         act.save_act(file_path)
