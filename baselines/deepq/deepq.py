@@ -461,10 +461,10 @@ def learn(env,
         num_k = 0
         while readable_total_timesteps % 1000000 == 0:
             num_m += 1
-            readable_total_timesteps /= 1000000
+            readable_total_timesteps = readable_total_timesteps // 1000000
         if readable_total_timesteps % 1000 == 0:
             num_k += 1
-            readable_total_timesteps /= 1000
+            readable_total_timesteps = readable_total_timesteps // 1000
         readable_total_timesteps = str(readable_total_timesteps)
         for i in range(num_k):
             readable_total_timesteps += 'K'
