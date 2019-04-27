@@ -32,7 +32,7 @@ class ActWrapper(object):
     @staticmethod
     def load_act(path):
         with open(path, "rb") as f:
-            model_data, act_params, train_params, replay_buffer, lb_buffer = cloudpickle.load(f)
+            model_data, act_params, _, replay_buffer, lb_buffer = cloudpickle.load(f)
         act = deepq.build_act(**act_params)
         sess = tf.Session()
         sess.__enter__()
@@ -44,7 +44,7 @@ class ActWrapper(object):
             zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
             load_variables(os.path.join(td, "model"))
 
-        return ActWrapper(act, act_params), train_params, replay_buffer, lb_buffer
+        return ActWrapper(act, act_params), replay_buffer, lb_buffer
 
     def __call__(self, *args, **kwargs):
         return self._act(*args, **kwargs)
@@ -55,7 +55,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, rep_buffer, lb_buffer, train_params_history=None, path=None):
+    def save_act(self, rep_buffer, lb_buffer, path=None):
         """Save model to a pickle located at `path`"""
 
         if path is None:
@@ -73,11 +73,9 @@ class ActWrapper(object):
             with open(arc_name, "rb") as f:
                 model_data = f.read()
 
-        if train_params_history is None:
-            train_params_history = []
-        train_params_history.append(atari())
+        train_params = atari()
         with open(path, "wb") as f:
-            cloudpickle.dump((model_data, self._act_params, train_params_history, rep_buffer, lb_buffer), f)
+            cloudpickle.dump((model_data, self._act_params, train_params, rep_buffer, lb_buffer), f)
 
     def save(self, path):
         save_variables(path)
@@ -272,8 +270,6 @@ def learn(env,
     lb_used = 0
     replay_counter = 0
 
-    train_params_history = None
-
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -286,7 +282,7 @@ def learn(env,
             model_saved = True
         elif load_path is not None:
             # load_variables(load_path)
-            act, train_params_history, replay_buffer, lb_buffer = load_act(load_path)
+            act, _, replay_buffer, lb_buffer = load_act(load_path)
             explore = False
             exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                          initial_p=exploration_final_eps,
@@ -487,10 +483,7 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        if train_params_history is not None:
-            act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, train_params_history=train_params_history, path=file_path)
-        else:
-            act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
         print('times:')
         for ti in times:
             print(ti[0])
