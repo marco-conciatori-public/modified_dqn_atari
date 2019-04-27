@@ -273,6 +273,8 @@ def learn(env,
     lb_used = 0
     replay_counter = 0
 
+    train_params_history = None
+
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -486,7 +488,7 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        if train_params_history:
+        if train_params_history is not None:
             act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, train_params_history=train_params_history, path=file_path)
         else:
             act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
