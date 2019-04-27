@@ -81,21 +81,34 @@ class ActWrapper(object):
         save_variables(path)
 
 
+# def load_act(path):
+#     """Load act function that was returned by learn function.
+#
+#     Parameters
+#     ----------
+#     path: str
+#         path to the act function pickle
+#
+#     Returns
+#     -------
+#     act: ActWrapper
+#         function that takes a batch of observations
+#         and returns actions.
+#     """
+#     return ActWrapper.load_act(path)
+
 def load_act(path):
-    """Load act function that was returned by learn function.
+    with open(path, "rb") as f:
+        model_data, _, _, replay_buffer, lb_buffer = cloudpickle.load(f)
+    with tempfile.TemporaryDirectory() as td:
+        arc_path = os.path.join(td, "packed.zip")
+        with open(arc_path, "wb") as f:
+            f.write(model_data)
 
-    Parameters
-    ----------
-    path: str
-        path to the act function pickle
+        zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
+        load_variables(os.path.join(td, "model"))
 
-    Returns
-    -------
-    act: ActWrapper
-        function that takes a batch of observations
-        and returns actions.
-    """
-    return ActWrapper.load_act(path)
+    return replay_buffer, lb_buffer
 
 
 def learn(env,
@@ -104,7 +117,6 @@ def learn(env,
           lr=5e-4,
           total_timesteps=100000,
           buffer_size=50000,
-          explore=True,
           exploration_fraction=0.1,
           exploration_final_eps=0.02,
           train_freq=1,
@@ -196,83 +208,83 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
+    now = time.time()
+    temp_steps = 0
+    times = []
+
+    steps_score_data = []
+
+    first_batch_training = True
+
+    sess = get_session()
+    set_global_seeds(seed)
+
+    log_dir = '/content/ml-dqn-atari/log'
+
+    q_func = build_q_func(network, **network_kwargs)
+
+    # capture the shape outside the closure so that the env object is not serialized
+    # by cloudpickle when serializing make_obs_ph
+
+    observation_space = env.observation_space
+    def make_obs_ph(name):
+        return ObservationInput(observation_space, name=name)
+
+    act, train, update_target, debug = deepq.build_train(
+        make_obs_ph=make_obs_ph,
+        q_func=q_func,
+        num_actions=env.action_space.n,
+        optimizer=tf.train.AdamOptimizer(learning_rate=lr),
+        gamma=gamma,
+        grad_norm_clipping=10,
+        param_noise=param_noise
+    )
+
+    q_values = debug['q_values']
+
+    act_params = {
+        'make_obs_ph': make_obs_ph,
+        'q_func': q_func,
+        'num_actions': env.action_space.n,
+    }
+
+    act = ActWrapper(act, act_params)
+
+    # Create the replay buffer
+    if prioritized_replay:
+        replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
+        if prioritized_replay_beta_iters is None:
+            prioritized_replay_beta_iters = total_timesteps
+        beta_schedule = LinearSchedule(prioritized_replay_beta_iters,
+                                       initial_p=prioritized_replay_beta0,
+                                       final_p=1.0)
+    else:
+        replay_buffer = ReplayBuffer(buffer_size)
+        beta_schedule = None
+    # Create the schedule for exploration starting from 1.
+    exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                                 initial_p=1.0,
+                                 final_p=exploration_final_eps)
+
+    # Create lower bounds buffer
+    lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
+
+    # Initialize the parameters and copy them to the target network.
+    U.initialize()
+    update_target()
+
+    episode_rewards = [0.0]
+    saved_mean_reward = None
+    obs = env.reset()
+    reset = True
+
+    lb_extracted = 0
+    lb_used = 0
+    replay_counter = 0
+
     with tempfile.TemporaryDirectory() as td:
-        now = time.time()
-        temp_steps = 0
-        times = []
-
-        steps_score_data = []
-
-        first_batch_training = True
-
-        sess = get_session()
-        set_global_seeds(seed)
-
-        log_dir = '/content/ml-dqn-atari/log'
-
-        q_func = build_q_func(network, **network_kwargs)
-
-        # capture the shape outside the closure so that the env object is not serialized
-        # by cloudpickle when serializing make_obs_ph
-
-        observation_space = env.observation_space
-        def make_obs_ph(name):
-            return ObservationInput(observation_space, name=name)
-
-        act, train, update_target, debug = deepq.build_train(
-            make_obs_ph=make_obs_ph,
-            q_func=q_func,
-            num_actions=env.action_space.n,
-            optimizer=tf.train.AdamOptimizer(learning_rate=lr),
-            gamma=gamma,
-            grad_norm_clipping=10,
-            param_noise=param_noise
-        )
-
-        q_values = debug['q_values']
-
-        act_params = {
-            'make_obs_ph': make_obs_ph,
-            'q_func': q_func,
-            'num_actions': env.action_space.n,
-        }
-
-        act = ActWrapper(act, act_params)
-
-        # Create the replay buffer
-        if prioritized_replay:
-            replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
-            if prioritized_replay_beta_iters is None:
-                prioritized_replay_beta_iters = total_timesteps
-            beta_schedule = LinearSchedule(prioritized_replay_beta_iters,
-                                           initial_p=prioritized_replay_beta0,
-                                           final_p=1.0)
-        else:
-            replay_buffer = ReplayBuffer(buffer_size)
-            beta_schedule = None
-        # Create the schedule for exploration starting from 1.
-        exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                     initial_p=1.0,
-                                     final_p=exploration_final_eps)
-
-        # Create lower bounds buffer
-        lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
-
-        # Initialize the parameters and copy them to the target network.
-        U.initialize()
-        update_target()
-
-        episode_rewards = [0.0]
-        saved_mean_reward = None
-        obs = env.reset()
-        reset = True
-
-        lb_extracted = 0
-        lb_used = 0
-        replay_counter = 0
-
-        # with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
+
         model_file = os.path.join(td, "model")
         model_saved = False
 
@@ -282,8 +294,7 @@ def learn(env,
             model_saved = True
         elif load_path is not None:
             # load_variables(load_path)
-            act, _, replay_buffer, lb_buffer = load_act(load_path)
-            explore = False
+            replay_buffer, lb_buffer = load_act(load_path)
             exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                          initial_p=exploration_final_eps,
                                          final_p=exploration_final_eps)

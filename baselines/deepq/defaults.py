@@ -17,7 +17,6 @@ def atari():
         gamma=0.99,
         train_freq=4,
         buffer_size=10000,
-        explore=True,
         exploration_final_eps=0.01,
         load_path=None,
         checkpoint_freq=10000,
