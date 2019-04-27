@@ -67,6 +67,7 @@ class ActWrapper(object):
             with zipfile.ZipFile(arc_name, 'w') as zipf:
                 for root, dirs, files in os.walk(td):
                     for fname in files:
+                        print('fname:', fname)
                         file_path = os.path.join(root, fname)
                         if file_path != arc_name:
                             zipf.write(file_path, os.path.relpath(file_path, td))
@@ -280,7 +281,8 @@ def learn(env,
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
-            load_variables(load_path)
+            # load_variables(load_path)
+            act.load_act(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
