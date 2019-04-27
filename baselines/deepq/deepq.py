@@ -32,7 +32,7 @@ class ActWrapper(object):
     @staticmethod
     def load_act(path):
         with open(path, "rb") as f:
-            model_data, act_params = cloudpickle.load(f)
+            model_data, act_params, train_params, replay_buffer, lb_buffer = cloudpickle.load(f)
         act = deepq.build_act(**act_params)
         sess = tf.Session()
         sess.__enter__()
@@ -44,7 +44,7 @@ class ActWrapper(object):
             zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
             load_variables(os.path.join(td, "model"))
 
-        return ActWrapper(act, act_params)
+        return ActWrapper(act, act_params), train_params, replay_buffer, lb_buffer
 
     def __call__(self, *args, **kwargs):
         return self._act(*args, **kwargs)
@@ -55,7 +55,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, path=None):
+    def save_act(self, rep_buffer, lb_buffer, train_params_history=None, path=None):
         """Save model to a pickle located at `path`"""
 
         if path is None:
@@ -74,9 +74,11 @@ class ActWrapper(object):
             with open(arc_name, "rb") as f:
                 model_data = f.read()
 
-        train_params = atari()
+        if train_params_history is None:
+            train_params_history = []
+        train_params_history.append(atari())
         with open(path, "wb") as f:
-            cloudpickle.dump((model_data, self._act_params, train_params), f)
+            cloudpickle.dump((model_data, self._act_params, train_params_history, rep_buffer, lb_buffer), f)
 
     def save(self, path):
         save_variables(path)
@@ -105,6 +107,7 @@ def learn(env,
           lr=5e-4,
           total_timesteps=100000,
           buffer_size=50000,
+          explore=True,
           exploration_fraction=0.1,
           exploration_final_eps=0.02,
           train_freq=1,
@@ -282,7 +285,11 @@ def learn(env,
             model_saved = True
         elif load_path is not None:
             # load_variables(load_path)
-            act.load_act(load_path)
+            act, train_params_history, replay_buffer, lb_buffer = load_act(load_path)
+            explore = False
+            exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                                         initial_p=exploration_final_eps,
+                                         final_p=exploration_final_eps)
             logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
@@ -479,7 +486,10 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + '_steps' + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        act.save_act(file_path)
+        if train_params_history:
+            act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, train_params_history=train_params_history, path=file_path)
+        else:
+            act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
         print('times:')
         for ti in times:
             print(ti[0])
