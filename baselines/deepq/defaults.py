@@ -12,7 +12,7 @@ def atari():
 
         # print_freq=100,
 
-        learning_starts=10000,
+        # learning_starts=10000,
         target_network_update_freq=1000,
         gamma=0.99,
         train_freq=4,
