@@ -29,22 +29,22 @@ class ActWrapper(object):
         self._act_params = act_params
         self.initial_state = None
 
-    @staticmethod
-    def load_act(path):
-        with open(path, "rb") as f:
-            model_data, act_params, _, replay_buffer, lb_buffer = cloudpickle.load(f)
-        act = deepq.build_act(**act_params)
-        sess = tf.Session()
-        sess.__enter__()
-        with tempfile.TemporaryDirectory() as td:
-            arc_path = os.path.join(td, "packed.zip")
-            with open(arc_path, "wb") as f:
-                f.write(model_data)
-
-            zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
-            load_variables(os.path.join(td, "model"))
-
-        return ActWrapper(act, act_params), replay_buffer, lb_buffer
+    # @staticmethod
+    # def load_act(path):
+    #     with open(path, "rb") as f:
+    #         model_data, act_params, _, replay_buffer, lb_buffer = cloudpickle.load(f)
+    #     act = deepq.build_act(**act_params)
+    #     sess = tf.Session()
+    #     sess.__enter__()
+    #     with tempfile.TemporaryDirectory() as td:
+    #         arc_path = os.path.join(td, "packed.zip")
+    #         with open(arc_path, "wb") as f:
+    #             f.write(model_data)
+    #
+    #         zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
+    #         load_variables(os.path.join(td, "model"))
+    #
+    #     return ActWrapper(act, act_params), replay_buffer, lb_buffer
 
     def __call__(self, *args, **kwargs):
         return self._act(*args, **kwargs)
@@ -298,6 +298,7 @@ def learn(env,
             exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                          initial_p=exploration_final_eps,
                                          final_p=exploration_final_eps)
+            update_target()
             logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
