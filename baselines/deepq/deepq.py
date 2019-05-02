@@ -293,9 +293,9 @@ def learn(env,
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
-            # load_variables(load_path)
-            load_act(load_path)
-            # replay_buffer, lb_buffer = load_act(load_path)
+            load_variables(load_path)
+            # load_act(load_path)
+            replay_buffer, lb_buffer = load_act(load_path)
             exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                          initial_p=exploration_final_eps,
                                          final_p=exploration_final_eps)
@@ -512,7 +512,8 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + step_str + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        # act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        act.save(file_path)
         print('times:')
         for ti in times:
             print(ti[0])
