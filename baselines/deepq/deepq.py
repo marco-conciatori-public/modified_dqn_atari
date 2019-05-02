@@ -512,7 +512,7 @@ def learn(env,
             file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + step_str + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
-        act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        act.save(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
         print('times:')
         for ti in times:
             print(ti[0])
