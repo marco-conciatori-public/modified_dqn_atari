@@ -293,8 +293,8 @@ def learn(env,
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
-            # load_variables(load_path)
-            load_act(load_path)
+            load_variables(load_path)
+            #load_act(load_path)
             # replay_buffer, lb_buffer = load_act(load_path)
             exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
                                          initial_p=exploration_final_eps,
