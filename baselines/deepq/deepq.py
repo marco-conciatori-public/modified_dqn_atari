@@ -514,7 +514,7 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
 
-        act.save(file_path)
+        save_variables(file_path)
         # act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
 
         print('times:')
