@@ -29,22 +29,25 @@ class ActWrapper(object):
         self._act_params = act_params
         self.initial_state = None
 
-    # @staticmethod
-    # def load_act(path):
-    #     with open(path, "rb") as f:
-    #         model_data, act_params, _, replay_buffer, lb_buffer = cloudpickle.load(f)
-    #     act = deepq.build_act(**act_params)
-    #     sess = tf.Session()
-    #     sess.__enter__()
-    #     with tempfile.TemporaryDirectory() as td:
-    #         arc_path = os.path.join(td, "packed.zip")
-    #         with open(arc_path, "wb") as f:
-    #             f.write(model_data)
-    #
-    #         zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
-    #         load_variables(os.path.join(td, "model"))
-    #
-    #     return ActWrapper(act, act_params), replay_buffer, lb_buffer
+    @staticmethod
+    def load_act(path):
+        with open(path, "rb") as f:
+            model_data, act_params, _, _, _ = cloudpickle.load(f)
+        act = deepq.build_act(**act_params)
+        sess = tf.Session()
+        sess.__enter__()
+        with tempfile.TemporaryDirectory() as td:
+            arc_path = os.path.join(td, "packed.zip")
+            with open(arc_path, "wb") as f:
+                f.write(model_data)
+
+            zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
+            load_variables(os.path.join(td, "model"))
+
+        print('loaded model trained with parameters:')
+        print(act_params)
+
+        return ActWrapper(act, act_params)
 
     def __call__(self, *args, **kwargs):
         return self._act(*args, **kwargs)
@@ -81,21 +84,22 @@ class ActWrapper(object):
         save_variables(path)
 
 
-# def load_act(path):
-#     """Load act function that was returned by learn function.
-#
-#     Parameters
-#     ----------
-#     path: str
-#         path to the act function pickle
-#
-#     Returns
-#     -------
-#     act: ActWrapper
-#         function that takes a batch of observations
-#         and returns actions.
-#     """
-#     return ActWrapper.load_act(path)
+def load_play_function(path):
+    """Load act function that was returned by learn function.
+
+    Parameters
+    ----------
+    path: str
+        path to the act function pickle
+
+    Returns
+    -------
+    act: ActWrapper
+        function that takes a batch of observations
+        and returns actions.
+    """
+    return ActWrapper.load_act(path)
+
 
 def load_act(path):
     with open(path, "rb") as f:
@@ -127,6 +131,7 @@ def learn(env,
           checkpoint_path=None,
           learning_starts=10000,
           gamma=1.0,
+          load_to_play=False,
           target_network_update_freq=500,
           prioritized_replay=False,
           prioritized_replay_alpha=0.6,
@@ -293,14 +298,16 @@ def learn(env,
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
-            load_variables(load_path)
-            #load_act(load_path)
-            # replay_buffer, lb_buffer = load_act(load_path)
+            if load_to_play:
+                # TODO: forse serve modificare ActWrapper.load_act
+                load_play_function(load_path)
+            else:
+                replay_buffer, lb_buffer = load_act(load_path)
+                exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                                             initial_p=exploration_final_eps,
+                                             final_p=exploration_final_eps)
+                logger.log('Loaded model from {}'.format(load_path))
 
-            exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                         initial_p=exploration_final_eps,
-                                         final_p=exploration_final_eps)
-            logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
         memorize_transition_time = 0
@@ -514,8 +521,7 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
 
-        save_variables(file_path)
-        # act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
 
         print('times:')
         for ti in times:
