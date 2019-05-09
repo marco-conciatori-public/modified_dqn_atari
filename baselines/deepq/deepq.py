@@ -369,34 +369,37 @@ def learn(env,
                 lb_buffer.compute_lb(q_values)
                 compute_lb_time += time.time()
 
-            # TODO: rimuovere "len(lb_buffer) > 0" dalle condizioni
-            #       ma eseguire le operazioni relative al lower bound buffer solo se "len(lb_buffer) > 0"
-            if t > learning_starts and t % train_freq == 0 and len(lb_buffer) > 0:
+            if t > learning_starts and t % train_freq == 0:
                 if not prioritized_replay:
                     if first_batch_training:
                         print('first_batch_training at episode:', t)
                         first_batch_training = False
-                    sample_time -= time.time()
-                    lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
-                    sample_time += time.time()
 
-                    lb_extracted += len(lb_obses_t)
-                    q_val_time -= time.time()
-                    estimated_rewards = q_values(np.array(lb_obses_t))
-                    q_val_time += time.time()
-                    test_time -= time.time()
-                    indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
-                    test_time += time.time()
+                    true_lb_batch_size = 0
+                    indexes = []
+                    if len(lb_buffer) > 0:
+                        sample_time -= time.time()
+                        lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
+                        sample_time += time.time()
 
-                    # remove_experiences_time -= time.time()
-                    # lb_buffer.remove_experiences(to_remove)
-                    # remove_experiences_time += time.time()
+                        lb_extracted += len(lb_obses_t)
+                        q_val_time -= time.time()
+                        estimated_rewards = q_values(np.array(lb_obses_t))
+                        q_val_time += time.time()
+                        test_time -= time.time()
+                        indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
+                        test_time += time.time()
+                        true_lb_batch_size = len(indexes)
 
-                    lb_used += len(indexes)
+                        # remove_experiences_time -= time.time()
+                        # lb_buffer.remove_experiences(to_remove)
+                        # remove_experiences_time += time.time()
+
+                        lb_used += true_lb_batch_size
+
                     replay_counter += replay_batch_size
-
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
-                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - len(indexes))
+                    obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - true_lb_batch_size)
 
                     # print('len(indexes):', len(indexes))
                     # print('++++++++++++++++++++++++++++++++')
