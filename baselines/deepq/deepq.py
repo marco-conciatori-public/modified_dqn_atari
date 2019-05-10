@@ -15,7 +15,7 @@ from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
 from baselines import deepq
-from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer, test
+from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer
 from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
@@ -232,6 +232,7 @@ def learn(env,
     # by cloudpickle when serializing make_obs_ph
 
     observation_space = env.observation_space
+
     def make_obs_ph(name):
         return ObservationInput(observation_space, name=name)
 
@@ -413,12 +414,11 @@ def learn(env,
                     # print('dones shape:', np.shape(dones))
 
                     append_time -= time.time()
-                    for i in true_lb_batch_size:
-                        obses_t.append(lb_obses_t[i])
-                        actions.append(lb_actions[i])
-                        rewards.append(lb_rewards[i])
-                        obses_tp1.append(lb_obses_tp1[i])
-                        dones.append(lb_dones[i])
+                    obses_t.extend(lb_obses_t)
+                    actions.extend(lb_actions)
+                    rewards.extend(lb_rewards)
+                    obses_tp1.extend(lb_obses_tp1)
+                    dones.extend(lb_dones)
 
                     obses_t = np.array(obses_t)
                     actions = np.array(actions)
@@ -426,6 +426,7 @@ def learn(env,
                     obses_tp1 = np.array(obses_tp1)
                     dones = np.array(dones)
                     append_time += time.time()
+
                     weights = np.ones_like(rewards)
                 else:
                     experience = replay_buffer.sample(replay_batch_size, beta=beta_schedule.value(t))
