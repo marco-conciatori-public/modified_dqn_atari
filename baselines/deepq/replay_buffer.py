@@ -155,14 +155,18 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
     def remove_bad_experiences(self, q_values):
         index = len(self._storage) - 1
-        to_remove = []
+        tot_exp = index + 1
+        counter = 0
         while index >= 0:
             obs_t, action, reward, _, _ = self._storage[index]
             if not test_single_exp(action, reward, q_values, obs_t):
                 self._storage.pop(index)
+                counter += 1
                 if index < self._next_idx:
                     self.decrease_circular_index()
             index -= 1
+
+        print('removed', counter, 'experiences (', counter / tot_exp * 100, '%)')
 
     def sample(self, batch_size):
         indexes = []
