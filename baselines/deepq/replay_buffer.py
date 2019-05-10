@@ -166,6 +166,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                     self.decrease_circular_index()
             index -= 1
 
+        print('removed exp:', counter, '(', 100 * counter / tot_exp, '%)')
         return counter, tot_exp
 
     def sample(self, batch_size):
