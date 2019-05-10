@@ -364,9 +364,10 @@ def learn(env,
                 episode_rewards.append(0.0)
                 reset = True
 
-                test_time -= time.time()
-                lb_buffer.remove_bad_experiences(q_values)
-                test_time += time.time()
+                if len(lb_buffer) > 0:
+                    test_time -= time.time()
+                    lb_buffer.remove_bad_experiences(q_values)
+                    test_time += time.time()
 
                 compute_lb_time -= time.time()
                 # lb_buffer.compute_lb()
