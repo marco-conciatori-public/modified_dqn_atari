@@ -453,13 +453,14 @@ def learn(env,
                 logger.record_tabular("steps", t)
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
-                logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
+                logger.record_tabular("% time spent exploring", 100 * exploration.value(t))
+                logger.record_tabular("len(lb_buffer)", len(lb_buffer))
 
                 if not prioritized_replay:
                     if len(lb_buffer) > 0:
                         logger.record_tabular("removed_exp", removed_exp)
-                        logger.record_tabular("% removed_exp / tot_exp", int(100 * removed_exp / tot_exp))
-                        logger.record_tabular("% tot_removed_exp / tot_tot_exp", int(100 * tot_removed_exp / tot_tot_exp))
+                        logger.record_tabular("% removed_exp / tot_exp", 100 * removed_exp / tot_exp)
+                        logger.record_tabular("% tot_removed_exp / tot_tot_exp", 100 * tot_removed_exp / tot_tot_exp)
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
