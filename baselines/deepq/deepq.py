@@ -287,7 +287,7 @@ def learn(env,
     lb_used = 0
     replay_counter = 0
     tot_removed_exp = 0
-    tot_tot_exp = 0
+    tot_tot_exp = 1
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -460,8 +460,8 @@ def learn(env,
                     if len(lb_buffer) > 0:
                         logger.record_tabular("removed_exp", removed_exp)
                         logger.record_tabular("% removed_exp / tot_exp", 100 * removed_exp / tot_exp)
-                        logger.record_tabular("% tot_removed_exp / tot_tot_exp", 100 * tot_removed_exp / tot_tot_exp)
-                        logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
+                    logger.record_tabular("% tot_removed_exp / tot_tot_exp", 100 * tot_removed_exp / tot_tot_exp)
+                    logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
                 temp_time = now
