@@ -366,7 +366,7 @@ def learn(env,
 
                 if len(lb_buffer) > 0:
                     test_time -= time.time()
-                    lb_buffer.remove_bad_experiences(q_values)
+                    removed_exp, tot_exp = lb_buffer.remove_bad_experiences(q_values)
                     test_time += time.time()
 
                 compute_lb_time -= time.time()
@@ -460,8 +460,11 @@ def learn(env,
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
+
                 if not prioritized_replay:
-                    if lb_extracted > 0:
+                    if len(lb_buffer) > 0:
+                        logger.record_tabular("removed_exp", removed_exp)
+                        logger.record_tabular("% removed_exp / tot_exp", int(100 * removed_exp / tot_exp))
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
