@@ -171,11 +171,15 @@ class LowerBoundReplayBuffer(ReplayBuffer):
     def sample(self, batch_size):
         indexes = []
         max_index = len(self._storage) - 1
+        if len(self._storage) <= 0:
+            return
         while len(indexes) < batch_size:
             temp_index = random.randint(0, max_index)
             # if temp_index not in self._free_indexes and temp_index not in indexes:
             if temp_index not in indexes:
                 indexes.append(temp_index)
+                if len(indexes) >= max_index + 1:
+                    break
         return self._encode_sample(indexes)
 
     # def sample(self, batch_size):

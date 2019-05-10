@@ -283,9 +283,10 @@ def learn(env,
     obs = env.reset()
     reset = True
 
-    lb_extracted = 0
     lb_used = 0
     replay_counter = 0
+    tot_removed_exp = 0
+    tot_tot_exp = 0
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -307,7 +308,6 @@ def learn(env,
                                              initial_p=exploration_final_eps,
                                              final_p=exploration_final_eps)
                 logger.log('Loaded model from {}'.format(load_path))
-
 
         tot_time = -time.time()
         memorize_transition_time = 0
@@ -369,6 +369,9 @@ def learn(env,
                     removed_exp, tot_exp = lb_buffer.remove_bad_experiences(q_values)
                     test_time += time.time()
 
+                    tot_removed_exp += removed_exp
+                    tot_tot_exp += tot_exp
+
                 compute_lb_time -= time.time()
                 # lb_buffer.compute_lb()
                 lb_buffer.compute_lb(q_values)
@@ -381,27 +384,17 @@ def learn(env,
                         first_batch_training = False
 
                     true_lb_batch_size = 0
-                    indexes = []
                     if len(lb_buffer) > 0:
                         sample_time -= time.time()
                         lb_obses_t, lb_actions, lb_rewards, lb_obses_tp1, lb_dones = lb_buffer.sample(lb_batch_size)
                         sample_time += time.time()
 
-                        lb_extracted += len(lb_obses_t)
                         q_val_time -= time.time()
                         estimated_rewards = q_values(np.array(lb_obses_t))
                         q_val_time += time.time()
-                        # test_time -= time.time()
-                        # indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
-                        # test_time += time.time()
-                        true_lb_batch_size = len(indexes)
-
-                        # remove_experiences_time -= time.time()
-                        # lb_buffer.remove_experiences(to_remove)
-                        # remove_experiences_time += time.time()
+                        true_lb_batch_size = len(lb_obses_t)
 
                         lb_used += true_lb_batch_size
-
                     replay_counter += replay_batch_size
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(replay_batch_size - true_lb_batch_size)
@@ -420,7 +413,7 @@ def learn(env,
                     # print('dones shape:', np.shape(dones))
 
                     append_time -= time.time()
-                    for i in indexes:
+                    for i in true_lb_batch_size:
                         obses_t.append(lb_obses_t[i])
                         actions.append(lb_actions[i])
                         rewards.append(lb_rewards[i])
@@ -465,6 +458,7 @@ def learn(env,
                     if len(lb_buffer) > 0:
                         logger.record_tabular("removed_exp", removed_exp)
                         logger.record_tabular("% removed_exp / tot_exp", int(100 * removed_exp / tot_exp))
+                        logger.record_tabular("% tot_removed_exp / tot_tot_exp", int(100 * tot_removed_exp / tot_tot_exp))
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
