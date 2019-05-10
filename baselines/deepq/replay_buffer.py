@@ -86,13 +86,14 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         super().__init__(size)
         self._episode_transitions = []
         self.gamma = gamma
-        # self.free_indexes = []
+        # self._free_indexes = []
 
     def add(self, obs_t, action, reward, new_obs, *unused_args):
-        # if len(self.free_indexes) > 0:
-        #     self._storage[self.free_indexes.pop()] = (obs_t, action, reward, new_obs, float(True))
+        # if len(self._free_indexes) > 0:
+        #     self._storage[self._free_indexes.pop()] = (obs_t, action, reward, new_obs, float(True))
         # else:
         super().add(obs_t, action, reward, new_obs, float(True))
+            # self.check_circular_index()
 
     def _encode_sample(self, idxes):
         obses_t, actions, rewards, obses_tp1, dones = [], [], [], [], []
@@ -105,7 +106,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
                 print('Esperienza (tupla):', data)
                 print('indice esp:', i)
                 print('puntatore ciclico:', self._next_idx)
-                # print('free_indexes:', self.free_indexes)
+                # print('free_indexes:', self._free_indexes)
                 print('len(_storage):', len(self._storage))
                 raise SystemExit
 
@@ -152,12 +153,23 @@ class LowerBoundReplayBuffer(ReplayBuffer):
 
         self._episode_transitions = []
 
+    def remove_bad_experiences(self, q_values):
+        index = len(self._storage) - 1
+        to_remove = []
+        while index >= 0:
+            obs_t, action, reward, _, _ = self._storage[index]
+            if not test_single_exp(action, reward, q_values, obs_t):
+                self._storage.pop(index)
+                if index < self._next_idx:
+                    self.decrease_circular_index()
+            index -= 1
+
     def sample(self, batch_size):
         indexes = []
         max_index = len(self._storage) - 1
         while len(indexes) < batch_size:
             temp_index = random.randint(0, max_index)
-            # if temp_index not in self.free_indexes and temp_index not in indexes:
+            # if temp_index not in self._free_indexes and temp_index not in indexes:
             if temp_index not in indexes:
                 indexes.append(temp_index)
         return self._encode_sample(indexes)
@@ -176,7 +188,34 @@ class LowerBoundReplayBuffer(ReplayBuffer):
     # def remove_experiences(self, to_remove):
     #     for i in to_remove:
     #         self._storage[i] = None
-    #         self.free_indexes.append(i)
+    #         self._free_indexes.append(i)
+    #         if i == self._next_idx:
+    #             self.increase_circular_index()
+
+    # def _remove_experiences(self, to_remove):
+    #     for i in to_remove:
+    #         self._storage.pop(i)
+    #         if i < self._next_idx:
+    #             self.decrease_circular_index()
+
+    def decrease_circular_index(self):
+        if self._next_idx > 0:
+            self._next_idx = self._next_idx - 1
+        else:
+            self._next_idx = len(self._storage)
+            print('decrease_circular_index problem')
+
+    # def increase_circular_index(self):
+    #     self._next_idx = (self._next_idx + 1) % self._maxsize
+    #     self.check_circular_index()
+    #
+    # def check_circular_index(self):
+    #     if len(self._free_indexes) == len(self._storage):
+    #         self._next_idx = 0
+    #         self._free_indexes = []
+    #         return
+    #     while self._next_idx in self._free_indexes:
+    #         self._next_idx = (self._next_idx + 1) % self._maxsize
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):

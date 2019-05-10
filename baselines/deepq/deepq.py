@@ -364,6 +364,10 @@ def learn(env,
                 episode_rewards.append(0.0)
                 reset = True
 
+                test_time -= time.time()
+                lb_buffer.remove_bad_experiences(q_values)
+                test_time += time.time()
+
                 compute_lb_time -= time.time()
                 # lb_buffer.compute_lb()
                 lb_buffer.compute_lb(q_values)
@@ -386,9 +390,9 @@ def learn(env,
                         q_val_time -= time.time()
                         estimated_rewards = q_values(np.array(lb_obses_t))
                         q_val_time += time.time()
-                        test_time -= time.time()
-                        indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
-                        test_time += time.time()
+                        # test_time -= time.time()
+                        # indexes, to_remove = test(lb_actions, lb_rewards, estimated_rewards)
+                        # test_time += time.time()
                         true_lb_batch_size = len(indexes)
 
                         # remove_experiences_time -= time.time()
