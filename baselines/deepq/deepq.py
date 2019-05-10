@@ -522,9 +522,9 @@ def learn(env,
             readable_total_timesteps += 'M'
 
         if model_saved:
-            file_name = env.spec.id + '_rew' + str(saved_mean_reward) + step_str + str(readable_total_timesteps) + '.pkl'
+            file_name = env.spec.id + '_newLbTest_rew' + str(saved_mean_reward) + step_str + str(readable_total_timesteps) + '.pkl'
         else:
-            file_name = env.spec.id + '_rew' + str(mean_100ep_reward) + step_str + str(readable_total_timesteps) + '.pkl'
+            file_name = env.spec.id + '_newLbTest_rew' + str(mean_100ep_reward) + step_str + str(readable_total_timesteps) + '.pkl'
 
         file_path = os.path.join('trained_models', file_name)
 
