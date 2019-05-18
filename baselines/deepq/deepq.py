@@ -271,6 +271,7 @@ def learn(env,
     # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
     #                              initial_p=1.0,
     #                              final_p=exploration_final_eps)
+    exploration = None
 
     # Create lower bounds buffer
     lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
