@@ -469,7 +469,7 @@ def learn(env,
                 logger.record_tabular("steps", t)
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
-                logger.record_tabular("% time spent exploring", 100 * exploration.value(t))
+                logger.record_tabular("% time spent exploring", 100 * exploration.value(exploration_counter))
                 logger.record_tabular("len(lb_buffer)", len(lb_buffer))
 
                 if not prioritized_replay:
