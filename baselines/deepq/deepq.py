@@ -482,7 +482,8 @@ def learn(env,
                         logger.record_tabular("removed_exp", removed_exp)
                         logger.record_tabular("% removed_exp / tot_exp", 100 * removed_exp / tot_exp)
                     logger.record_tabular("% tot_removed_exp / tot_tot_exp", 100 * tot_removed_exp / tot_tot_exp)
-                    logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
+                    if t > learning_starts:
+                        logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
 
                 temp_time = now
