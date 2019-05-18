@@ -267,10 +267,10 @@ def learn(env,
     else:
         replay_buffer = ReplayBuffer(buffer_size)
         beta_schedule = None
-    # Create the schedule for exploration starting from 1.
-    exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                 initial_p=1.0,
-                                 final_p=exploration_final_eps)
+    # # Create the schedule for exploration starting from 1.
+    # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+    #                              initial_p=1.0,
+    #                              final_p=exploration_final_eps)
 
     # Create lower bounds buffer
     lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
@@ -327,6 +327,11 @@ def learn(env,
         # print('+++++++++++++++ expected log_dir:', log_dir)
         # print('+++++++++++++++ log_dir:', writer.get_logdir())
 
+        exploration_counter = 0
+        got_reward = False
+        first_reward = True
+        update_eps = 1
+
         for t in range(total_timesteps):
             if callback is not None:
                 if callback(locals(), globals()):
@@ -334,7 +339,16 @@ def learn(env,
             # Take action and update exploration to the newest value
             kwargs = {}
             if not param_noise:
-                update_eps = exploration.value(t)
+                # TODO: fare interazione corretta quando load_path non è nullo
+                if got_reward:
+                    if first_reward:
+                        first_reward = False
+                        # Create the schedule for exploration starting from 1.
+                        exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
+                                                     initial_p=1.0,
+                                                     final_p=exploration_final_eps)
+                    update_eps = exploration.value(exploration_counter)
+                    exploration_counter += 1
                 update_param_noise_threshold = 0.
             else:
                 update_eps = 0.
@@ -361,6 +375,8 @@ def learn(env,
 
             episode_rewards[-1] += rew
             if done:
+                if episode_rewards[-1] > 0:
+                    got_reward = True
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
