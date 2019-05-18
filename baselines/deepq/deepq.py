@@ -431,11 +431,12 @@ def learn(env,
                     # print('dones shape:', np.shape(dones))
 
                     append_time -= time.time()
-                    obses_t.extend(lb_obses_t)
-                    actions.extend(lb_actions)
-                    rewards.extend(lb_rewards)
-                    obses_tp1.extend(lb_obses_tp1)
-                    dones.extend(lb_dones)
+                    if len(lb_buffer) > 0:
+                        obses_t.extend(lb_obses_t)
+                        actions.extend(lb_actions)
+                        rewards.extend(lb_rewards)
+                        obses_tp1.extend(lb_obses_tp1)
+                        dones.extend(lb_dones)
 
                     obses_t = np.array(obses_t)
                     actions = np.array(actions)
