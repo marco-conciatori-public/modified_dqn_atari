@@ -387,7 +387,7 @@ def learn(env,
 
             obs = new_obs
 
-            episode_rewards[-1] += rew - alive_bonus
+            episode_rewards[-1] += max(0, rew - alive_bonus)
             if done:
                 if episode_rewards[-1] > 0:
                     got_reward = True
