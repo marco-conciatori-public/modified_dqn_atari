@@ -340,16 +340,22 @@ def learn(env,
             # Take action and update exploration to the newest value
             kwargs = {}
             if not param_noise:
-                # TODO: fare interazione corretta quando load_path non è nullo
-                if got_reward:
-                    if first_reward:
-                        first_reward = False
-                        # Create the schedule for exploration starting from 1.
-                        exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
-                                                     initial_p=1.0,
-                                                     final_p=exploration_final_eps)
-                    update_eps = exploration.value(exploration_counter)
-                    exploration_counter += 1
+                # # TODO: fare interazione corretta quando load_path non è nullo
+                # if got_reward:
+                #     if first_reward:
+                #         first_reward = False
+                #         # Create the schedule for exploration starting from 1.
+                #         exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
+                #                                      initial_p=1.0,
+                #                                      final_p=exploration_final_eps)
+                #     update_eps = exploration.value(exploration_counter)
+                #     exploration_counter += 1
+
+                # Create the schedule for exploration starting from 1.
+                exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                                             initial_p=1.0,
+                                             final_p=exploration_final_eps)
+                update_eps = exploration.value(t)
                 update_param_noise_threshold = 0.
             else:
                 update_eps = 0.
