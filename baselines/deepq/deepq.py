@@ -365,6 +365,13 @@ def learn(env,
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
+
+            # test:
+            #   little reward for not dieing
+            #   to see if in hard games this helps reaching the first true reward
+            if not done:
+                rew += 1
+
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done))
 
