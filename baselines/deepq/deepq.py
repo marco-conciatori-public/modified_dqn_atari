@@ -328,8 +328,8 @@ def learn(env,
         # print('+++++++++++++++ expected log_dir:', log_dir)
         # print('+++++++++++++++ log_dir:', writer.get_logdir())
 
-        exploration_counter = 0
-        got_reward = False
+        # exploration_counter = 0
+        # got_reward = False
         first_reward = True
         update_eps = 1
 
@@ -389,8 +389,8 @@ def learn(env,
 
             episode_rewards[-1] += max(0, rew - alive_bonus)
             if done:
-                if episode_rewards[-1] > 0:
-                    got_reward = True
+                # if episode_rewards[-1] > 0:
+                #     got_reward = True
                 obs = env.reset()
                 episode_rewards.append(0.0)
                 reset = True
@@ -484,11 +484,12 @@ def learn(env,
                 logger.record_tabular("steps", t)
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
-                if exploration is None:
-                    exp_to_print = 100
-                else:
-                    exp_to_print = 100 * exploration.value(exploration_counter)
-                logger.record_tabular("% time spent exploring", exp_to_print)
+                # if exploration is None:
+                #     exp_to_print = 100
+                # else:
+                #     exp_to_print = 100 * exploration.value(exploration_counter)
+                # logger.record_tabular("% time spent exploring", exp_to_print)
+                logger.record_tabular("% time spent exploring", exploration.value(t))
                 logger.record_tabular("len(lb_buffer)", len(lb_buffer))
 
                 if not prioritized_replay:
