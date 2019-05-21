@@ -23,6 +23,8 @@ from baselines.deepq.models import build_q_func
 from baselines.deepq.defaults import atari
 
 
+alive_bonus = 1
+
 class ActWrapper(object):
     def __init__(self, act, act_params):
         self._act = act
@@ -370,7 +372,7 @@ def learn(env,
             #   little reward for not dieing
             #   to see if in hard games this helps reaching the first true reward
             if not done:
-                rew += 1
+                rew += alive_bonus
 
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done))

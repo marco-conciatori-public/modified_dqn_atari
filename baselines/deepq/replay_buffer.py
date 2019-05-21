@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 from baselines.common.segment_tree import SumSegmentTree, MinSegmentTree
-
+from baselines.deepq.deepq import alive_bonus
 
 class ReplayBuffer(object):
     def __init__(self, size):
@@ -87,6 +87,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         self._episode_transitions = []
         self.gamma = gamma
         # self._free_indexes = []
+        self.reward_threshold = max(0, alive_bonus)
 
     def add(self, obs_t, action, reward, new_obs, *unused_args):
         # if len(self._free_indexes) > 0:
@@ -141,7 +142,7 @@ class LowerBoundReplayBuffer(ReplayBuffer):
         got_reward = False
         while index >= 0:
             obs_t, action, reward, new_obs = self._episode_transitions[index]
-            if reward > 0:
+            if reward > self.reward_threshold:
                 got_reward = True
 
             if got_reward:
