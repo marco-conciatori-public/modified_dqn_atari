@@ -381,7 +381,7 @@ def learn(env,
 
             obs = new_obs
 
-            episode_rewards[-1] += rew
+            episode_rewards[-1] += rew - alive_bonus
             if done:
                 if episode_rewards[-1] > 0:
                     got_reward = True
