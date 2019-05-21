@@ -15,15 +15,13 @@ from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
 from baselines import deepq
-from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer
+from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer, alive_bonus
 from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
 from baselines.deepq.models import build_q_func
 from baselines.deepq.defaults import atari
 
-
-alive_bonus = 1
 
 class ActWrapper(object):
     def __init__(self, act, act_params):

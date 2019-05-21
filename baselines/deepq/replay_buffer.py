@@ -2,7 +2,8 @@ import numpy as np
 import random
 
 from baselines.common.segment_tree import SumSegmentTree, MinSegmentTree
-from baselines.deepq.deepq import alive_bonus
+
+alive_bonus = 1
 
 class ReplayBuffer(object):
     def __init__(self, size):
