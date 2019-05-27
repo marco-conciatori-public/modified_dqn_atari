@@ -283,6 +283,8 @@ def learn(env,
     tot_removed_exp = 0
     tot_tot_exp = 1
 
+    num_actions = env.action_space.n
+
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -339,11 +341,22 @@ def learn(env,
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
-            action = None
+            # random action
+            action = np.random.choice(num_actions)
             if got_reward:
-                action =
-            else:
-                action =
+                actions_q_values = q_values(np.array(obs))[0]
+                sum_positive_q_values = 0
+                # choice probability
+                p = []
+                for el in actions_q_values:
+                    positive_el = max(0, el)
+                    p.append(positive_el)
+                    sum_positive_q_values += positive_el
+                if sum_positive_q_values > 0:
+                    normalized_p = [el / sum_positive_q_values for el in p]
+                    action = np.random.choice(num_actions, p=normalized_p)
+                else:
+                    print('got_reward ma sum_positive_q_values > 0; cioè solo q-values negativi come stima dei valori delle mosse')
 
             env_action = action
             reset = False
