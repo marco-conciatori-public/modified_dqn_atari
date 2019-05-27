@@ -290,6 +290,9 @@ def learn(env,
     tot_removed_exp = 0
     tot_tot_exp = 1
 
+    print('env.action_space:', env.action_space)
+    print('env.action_space.n:', env.action_space.n)
+
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
