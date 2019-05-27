@@ -356,6 +356,8 @@ def learn(env,
                 if sum_positive_q_values > 0:
                     normalized_p = [el / sum_positive_q_values for el in p]
                     action = np.random.choice(num_actions, p=normalized_p)
+                    if t > learning_starts and t % train_freq == 0:
+                        print('normalized_p:', normalized_p)
                 else:
                     action = actions_q_values.index(max(actions_q_values))
                     print('got_reward ma sum_positive_q_values < 0; cioè solo q-values negativi come stima dei valori delle mosse')
