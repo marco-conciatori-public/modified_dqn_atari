@@ -359,7 +359,8 @@ def learn(env,
                 else:
                     action = actions_q_values.index(max(actions_q_values))
                     print('got_reward ma sum_positive_q_values < 0; cioè solo q-values negativi come stima dei valori delle mosse')
-                    print('scelgo ')
+                    print('sum_positive_q_values:', sum_positive_q_values)
+                    print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
 
             env_action = action
             reset = False
