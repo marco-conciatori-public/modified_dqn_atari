@@ -121,8 +121,6 @@ def learn(env,
           lr=5e-4,
           total_timesteps=100000,
           buffer_size=50000,
-          exploration_fraction=0.1,
-          exploration_final_eps=0.02,
           train_freq=1,
           replay_batch_size=32,
           lb_batch_size=16,
@@ -160,10 +158,6 @@ def learn(env,
         number of env steps to optimizer for
     buffer_size: int
         size of the replay buffer
-    exploration_fraction: float
-        fraction of entire training period over which the exploration rate is annealed
-    exploration_final_eps: float
-        final value of random action probability
     train_freq: int
         update the model every `train_freq` steps.
         set to None to disable printing
@@ -271,7 +265,6 @@ def learn(env,
     # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
     #                              initial_p=1.0,
     #                              final_p=exploration_final_eps)
-    exploration = None
 
     # Create lower bounds buffer
     lb_buffer = LowerBoundReplayBuffer(buffer_size, gamma)
@@ -306,9 +299,6 @@ def learn(env,
                 load_play_function(load_path)
             else:
                 replay_buffer, lb_buffer = load_act(load_path)
-                exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                             initial_p=exploration_final_eps,
-                                             final_p=exploration_final_eps)
                 logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
@@ -328,10 +318,8 @@ def learn(env,
         # print('+++++++++++++++ expected log_dir:', log_dir)
         # print('+++++++++++++++ log_dir:', writer.get_logdir())
 
-        exploration_counter = 0
         got_reward = False
         first_reward = True
-        update_eps = 1
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -341,27 +329,22 @@ def learn(env,
             kwargs = {}
             if not param_noise:
                 # TODO: fare interazione corretta quando load_path non è nullo
-                if got_reward:
-                    if first_reward:
-                        first_reward = False
-                        # Create the schedule for exploration starting from 1.
-                        exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
-                                                     initial_p=1.0,
-                                                     final_p=exploration_final_eps)
-                    update_eps = exploration.value(exploration_counter)
-                    exploration_counter += 1
                 update_param_noise_threshold = 0.
             else:
-                update_eps = 0.
                 # Compute the threshold such that the KL divergence between perturbed and non-perturbed
                 # policy is comparable to eps-greedy exploration with eps = exploration.value(t).
                 # See Appendix C.1 in Parameter Space Noise for Exploration, Plappert et al., 2017
                 # for detailed explanation.
-                update_param_noise_threshold = -np.log(1. - exploration.value(t) + exploration.value(t) / float(env.action_space.n))
                 kwargs['reset'] = reset
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
-            action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            action = None
+            if got_reward:
+                action =
+            else:
+                action =
+
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
@@ -471,11 +454,6 @@ def learn(env,
                 logger.record_tabular("steps", t)
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
-                if exploration is None:
-                    exp_to_print = 100
-                else:
-                    exp_to_print = 100 * exploration.value(exploration_counter)
-                logger.record_tabular("% time spent exploring", exp_to_print)
                 logger.record_tabular("len(lb_buffer)", len(lb_buffer))
 
                 if not prioritized_replay:
