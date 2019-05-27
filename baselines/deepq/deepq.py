@@ -290,9 +290,6 @@ def learn(env,
     tot_removed_exp = 0
     tot_tot_exp = 1
 
-    print('env.action_space:', env.action_space)
-    print('env.action_space.n:', env.action_space.n)
-
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -365,7 +362,6 @@ def learn(env,
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
             action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
-            print('action format:', action)
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
