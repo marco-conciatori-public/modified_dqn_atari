@@ -362,6 +362,7 @@ def learn(env,
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
             action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            print('action format:', action)
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
