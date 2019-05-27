@@ -349,6 +349,7 @@ def learn(env,
                 # choice probability
                 p = []
                 for el in actions_q_values:
+                    # scarto le mosse con q-value negativo, a meno che non siano tutti negativi
                     positive_el = max(0, el)
                     p.append(positive_el)
                     sum_positive_q_values += positive_el
@@ -356,7 +357,9 @@ def learn(env,
                     normalized_p = [el / sum_positive_q_values for el in p]
                     action = np.random.choice(num_actions, p=normalized_p)
                 else:
-                    print('got_reward ma sum_positive_q_values > 0; cioè solo q-values negativi come stima dei valori delle mosse')
+                    action = actions_q_values.index(max(actions_q_values))
+                    print('got_reward ma sum_positive_q_values < 0; cioè solo q-values negativi come stima dei valori delle mosse')
+                    print('scelgo ')
 
             env_action = action
             reset = False
