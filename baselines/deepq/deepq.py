@@ -322,6 +322,7 @@ def learn(env,
 
         got_reward = False
         first_reward = True
+        all_negative_counter = 0
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -356,13 +357,14 @@ def learn(env,
                 if sum_positive_q_values > 0:
                     normalized_p = [el / sum_positive_q_values for el in p]
                     action = np.random.choice(num_actions, p=normalized_p)
-                    if t > learning_starts and t % train_freq == 0:
+                    if done and print_freq is not None and t % print_freq == 0:
                         print('normalized_p:', normalized_p)
                 else:
                     action = actions_q_values.index(max(actions_q_values))
                     print('got_reward ma sum_positive_q_values < 0; cioè solo q-values negativi come stima dei valori delle mosse')
                     print('sum_positive_q_values:', sum_positive_q_values)
                     print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
+                    all_negative_counter += 1
 
             env_action = action
             reset = False
@@ -564,6 +566,7 @@ def learn(env,
         for el in steps_score_data:
             print(el[1])
         logger.record_tabular("% memorize_transition_time", 100 * memorize_transition_time / tot_time)
+        logger.record_tabular("% all negative", 100 * all_negative_counter / total_timesteps)
         logger.record_tabular("% compute_lb_time", 100 * compute_lb_time / tot_time)
         logger.record_tabular("% sample_time", 100 * sample_time / tot_time)
         logger.record_tabular("% test_time", 100 * test_time / tot_time)
