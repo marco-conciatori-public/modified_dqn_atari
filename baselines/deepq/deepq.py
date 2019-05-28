@@ -343,7 +343,7 @@ def learn(env,
                 kwargs['update_param_noise_scale'] = True
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             # random action
-            e = 0.001
+            e = 0.01
             action = np.random.choice(num_actions)
             if got_reward:
                 actions_q_values = q_values(np.array(obs))[0]
