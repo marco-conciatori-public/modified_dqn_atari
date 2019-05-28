@@ -343,6 +343,7 @@ def learn(env,
                 kwargs['update_param_noise_scale'] = True
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             # random action
+            e = 0.001
             action = np.random.choice(num_actions)
             if got_reward:
                 actions_q_values = q_values(np.array(obs))[0]
@@ -357,7 +358,8 @@ def learn(env,
                 if sum_positive_q_values > 0:
                     normalized_p = [el / sum_positive_q_values for el in p]
                     # action = np.random.choice(num_actions, p=normalized_p)
-                    action = actions_q_values.argmax()
+                    if np.random.uniform(0, 1) > e:
+                        action = actions_q_values.argmax()
                 else:
                     action = actions_q_values.argmax()
                     # print('got_reward ma sum_positive_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
