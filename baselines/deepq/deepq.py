@@ -362,7 +362,7 @@ def learn(env,
                         action = actions_q_values.argmax()
                 else:
                     action = actions_q_values.argmax()
-                    # print('got_reward ma sum_positive_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
+                    print('got_reward ma sum_positive_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
                     # print('sum_positive_q_values:', sum_positive_q_values)
                     # print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
                     all_negative_counter += 1
