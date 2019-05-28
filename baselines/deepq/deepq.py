@@ -343,27 +343,25 @@ def learn(env,
                 kwargs['update_param_noise_scale'] = True
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             # random action
-            e = 0.01
             action = np.random.choice(num_actions)
             if got_reward:
                 actions_q_values = q_values(np.array(obs))[0]
-                sum_positive_q_values = 0
+                sum_positive_quad_q_values = 0
                 # choice probability
                 p = []
                 for el in actions_q_values:
                     # scarto le mosse con q-value negativo, a meno che non siano tutti negativi
-                    positive_el = max(0, el)
-                    p.append(positive_el)
-                    sum_positive_q_values += positive_el
-                if sum_positive_q_values > 0:
-                    normalized_p = [el / sum_positive_q_values for el in p]
-                    # action = np.random.choice(num_actions, p=normalized_p)
-                    if np.random.uniform(0, 1) > e:
-                        action = actions_q_values.argmax()
+                    positive_quad_el = max(0, el) * el
+                    p.append(positive_quad_el)
+                    sum_positive_quad_q_values += positive_quad_el
+                if sum_positive_quad_q_values > 0:
+                    normalized_p = [el / sum_positive_quad_q_values for el in p]
+                    action = np.random.choice(num_actions, p=normalized_p)
                 else:
+                    # se tutte le mosse sono negative scelgo la migliore in modo deterministico
                     action = actions_q_values.argmax()
-                    print('got_reward ma sum_positive_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
-                    # print('sum_positive_q_values:', sum_positive_q_values)
+                    # print('got_reward ma sum_positive_quad_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
+                    # print('sum_positive_quad_q_values:', sum_positive_quad_q_values)
                     # print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
                     all_negative_counter += 1
 
