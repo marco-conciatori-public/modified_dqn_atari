@@ -356,14 +356,13 @@ def learn(env,
                     sum_positive_q_values += positive_el
                 if sum_positive_q_values > 0:
                     normalized_p = [el / sum_positive_q_values for el in p]
-                    action = np.random.choice(num_actions, p=normalized_p)
-                    if done and print_freq is not None and t % print_freq == 0:
-                        print('normalized_p:', normalized_p)
+                    # action = np.random.choice(num_actions, p=normalized_p)
+                    action = actions_q_values.argmax()
                 else:
                     action = actions_q_values.argmax()
-                    print('got_reward ma sum_positive_q_values < 0; cioè solo q-values negativi come stima dei valori delle mosse')
-                    print('sum_positive_q_values:', sum_positive_q_values)
-                    print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
+                    # print('got_reward ma sum_positive_q_values <= 0; cioè solo q-values negativi come stima dei valori delle mosse')
+                    # print('sum_positive_q_values:', sum_positive_q_values)
+                    # print('scelgo in modo deterministico quella migliore (con valore:', max(actions_q_values), ')')
                     all_negative_counter += 1
 
             env_action = action
