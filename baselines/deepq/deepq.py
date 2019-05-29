@@ -503,7 +503,6 @@ def learn(env,
             mean_100ep_reward = round(np.mean(episode_rewards[-101:-1]), 1)
             num_episodes = len(episode_rewards)
             if done and print_freq is not None and len(episode_rewards) % print_freq == 0:
-                logger.record_tabular('--------------- general', '---------------')
                 logger.record_tabular("steps", t)
                 logger.record_tabular("episodes", num_episodes)
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
@@ -512,7 +511,6 @@ def learn(env,
                 else:
                     exp_to_print = 100 * (1 - exploration.value(exploration_counter))
                 logger.record_tabular("% time spent exploring", exp_to_print)
-                logger.record_tabular('-------------- lb_buffer', '--------------')
                 logger.record_tabular("len(lb_buffer)", len(lb_buffer))
 
                 if not prioritized_replay:
@@ -522,15 +520,14 @@ def learn(env,
                     logger.record_tabular("% tot_removed_exp / tot_tot_exp", 100 * tot_removed_exp / tot_tot_exp)
                     if t > learning_starts:
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
-                logger.record_tabular('----- stochastic operations debug', '-----')
-                logger.record_tabular('actions_q_values:', actions_q_values)
-                logger.record_tabular('max_diff:', max_diff)
-                logger.record_tabular('min_el:', min_el)
-                logger.record_tabular('threshold_value:', threshold_value)
-                logger.record_tabular('p:', p)
-                logger.record_tabular('normalized_p:', normalized_p)
-                logger.record_tabular('action:', action)
                 logger.dump_tabular()
+                print('actions_q_values:', actions_q_values)
+                print('max_diff:', max_diff)
+                print('min_el:', min_el)
+                print('threshold_value:', threshold_value)
+                print('p:', p)
+                print('normalized_p:', normalized_p)
+                print('action:', action)
 
                 temp_time = now
                 now = time.time()
