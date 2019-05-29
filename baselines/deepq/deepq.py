@@ -290,6 +290,8 @@ def learn(env,
     tot_removed_exp = 0
     tot_tot_exp = 1
 
+    num_actions = env.action_space.n
+
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
 
@@ -306,9 +308,10 @@ def learn(env,
                 load_play_function(load_path)
             else:
                 replay_buffer, lb_buffer = load_act(load_path)
-                exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                             initial_p=exploration_final_eps,
-                                             final_p=exploration_final_eps)
+                # TODO: da cambiare per questa branch
+                # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                #                              initial_p=exploration_final_eps,
+                #                              final_p=exploration_final_eps)
                 logger.log('Loaded model from {}'.format(load_path))
 
         tot_time = -time.time()
@@ -344,10 +347,11 @@ def learn(env,
                 if got_reward:
                     if first_reward:
                         first_reward = False
-                        # Create the schedule for exploration starting from 1.
+                        # TODO: mettere valori parametrici
+                        # TODO: testare final_p con valori >1
                         exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
-                                                     initial_p=1.0,
-                                                     final_p=exploration_final_eps)
+                                                     initial_p=0.,
+                                                     final_p=1.)
                     update_eps = exploration.value(exploration_counter)
                     exploration_counter += 1
                 update_param_noise_threshold = 0.
@@ -361,7 +365,38 @@ def learn(env,
                 kwargs['reset'] = reset
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
-            action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            # random action
+            action = np.random.choice(num_actions)
+            if got_reward:
+                actions_q_values = q_values(np.array(obs))[0]
+                max_diff = actions_q_values.ptp()
+                min_el = actions_q_values.min()
+                threshold_value = 0
+                if min_el < 0:
+                    threshold_value = abs(min_el) + max_diff / 2
+
+                print('actions_q_values:', actions_q_values)
+                print('max_diff:', max_diff)
+                print('min_el:', min_el)
+                print('threshold_value:', threshold_value)
+
+                # choice probability
+                p = []
+                sum_modified_el = 0
+                for el in actions_q_values:
+                    # normalize element
+                    modified_el = el + threshold_value
+                    # elevate element
+                    modified_el = pow(modified_el, exploration.value(exploration_counter))
+                    p.append(modified_el)
+                    sum_modified_el += modified_el
+                normalized_p = [el / sum_modified_el for el in p]
+                action = np.random.choice(num_actions, p=normalized_p)
+                print('p:', p)
+                print('normalized_p:', normalized_p)
+                print('action:', action)
+
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
