@@ -122,7 +122,7 @@ def learn(env,
           total_timesteps=100000,
           buffer_size=50000,
           exploration_fraction=0.1,
-          exploration_final_eps=0.02,
+          exploration_final_eps=100,
           train_freq=1,
           replay_batch_size=32,
           lb_batch_size=16,
@@ -351,7 +351,7 @@ def learn(env,
                         # TODO: testare final_p con valori >1
                         exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * (total_timesteps - t)),
                                                      initial_p=0.,
-                                                     final_p=1.)
+                                                     final_p=exploration_final_eps)
                     update_eps = exploration.value(exploration_counter)
                     exploration_counter += 1
                 update_param_noise_threshold = 0.
