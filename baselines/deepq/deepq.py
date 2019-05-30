@@ -391,7 +391,8 @@ def learn(env,
                     p.append(modified_el)
                     sum_modified_el += modified_el
                 normalized_p = [el / sum_modified_el for el in p]
-                print('normalized_p:', normalized_p)
+                if not(type(normalized_p) is list):
+                    print('type(normalized_p):', type(normalized_p))
                 action = np.random.choice(num_actions, p=normalized_p)
                 # print('p:', p)
                 # print('action:', action)
