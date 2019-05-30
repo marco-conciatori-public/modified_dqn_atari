@@ -391,7 +391,11 @@ def learn(env,
                     p.append(modified_el)
                     sum_modified_el += modified_el
                 normalized_p = [el / sum_modified_el for el in p]
-                if not(type(normalized_p) is list):
+
+                try:
+                    action = np.random.choice(num_actions, p=normalized_p)
+                except ValueError as e:
+                    print('Errore:', e)
                     print('type(normalized_p):', type(normalized_p))
                     print('normalized_p:', normalized_p)
                     print('step:', t)
@@ -401,9 +405,7 @@ def learn(env,
                     print('threshold_value:', threshold_value)
                     print('sum_modified_el:', sum_modified_el)
                     print('p:', p)
-                action = np.random.choice(num_actions, p=normalized_p)
-                # print('p:', p)
-                # print('action:', action)
+                    raise SystemExit
 
             env_action = action
             reset = False
