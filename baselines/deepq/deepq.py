@@ -394,6 +394,13 @@ def learn(env,
                 if not(type(normalized_p) is list):
                     print('type(normalized_p):', type(normalized_p))
                     print('normalized_p:', normalized_p)
+                    print('step:', t)
+                    print('actions_q_values:', actions_q_values)
+                    print('max_diff:', max_diff)
+                    print('min_el:', min_el)
+                    print('threshold_value:', threshold_value)
+                    print('sum_modified_el:', sum_modified_el)
+                    print('p:', p)
                 action = np.random.choice(num_actions, p=normalized_p)
                 # print('p:', p)
                 # print('action:', action)
