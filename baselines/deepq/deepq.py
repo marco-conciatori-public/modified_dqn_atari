@@ -391,10 +391,9 @@ def learn(env,
                     p.append(modified_el)
                     sum_modified_el += modified_el
                 normalized_p = [el / sum_modified_el for el in p]
-                assert len(num_actions) == len(normalized_p)
+                print('normalized_p:', normalized_p)
                 action = np.random.choice(num_actions, p=normalized_p)
                 # print('p:', p)
-                # print('normalized_p:', normalized_p)
                 # print('action:', action)
 
             env_action = action
