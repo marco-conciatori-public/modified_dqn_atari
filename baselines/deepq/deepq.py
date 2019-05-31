@@ -372,8 +372,8 @@ def learn(env,
                 max_diff = actions_q_values.ptp()
                 min_el = actions_q_values.min()
                 threshold_value = 0
-                if min_el < 0:
-                    threshold_value = abs(min_el) + max_diff / 2
+                # if min_el < 0:
+                threshold_value = max_diff / 2 - min_el
 
                 # print('actions_q_values:', actions_q_values)
                 # print('max_diff:', max_diff)
