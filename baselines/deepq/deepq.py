@@ -369,28 +369,16 @@ def learn(env,
             action = np.random.choice(num_actions)
             if got_reward:
                 actions_q_values = q_values(np.array(obs))[0]
-                max_diff = actions_q_values.ptp()
-                min_el = actions_q_values.min()
-                threshold_value = 0
-                # if min_el < 0:
-                threshold_value = max_diff / 10 - min_el
-
-                # print('actions_q_values:', actions_q_values)
-                # print('max_diff:', max_diff)
-                # print('min_el:', min_el)
-                # print('threshold_value:', threshold_value)
-
-                # choice probability
+                index_list = actions_q_values.argsort().tolist()
                 p = []
-                sum_modified_el = 0
-                for el in actions_q_values:
-                    # normalize element
-                    modified_el = el + threshold_value
-                    # elevate element
-                    modified_el = pow(modified_el, exploration.value(exploration_counter))
-                    p.append(modified_el)
-                    sum_modified_el += modified_el
-                normalized_p = [el / sum_modified_el for el in p]
+                sum_p = 0
+                for i in range(len(index_list)):
+                    rank = index_list.index(i)
+                    el = pow(rank, exploration.value(exploration_counter))
+                    p.append(el)
+                    sum_p += el
+                normalized_p = [el / sum_p for el in p]
+                normalized_p = np.array(normalized_p)
 
                 try:
                     action = np.random.choice(num_actions, p=normalized_p)
@@ -400,10 +388,7 @@ def learn(env,
                     print('normalized_p:', normalized_p)
                     print('step:', t)
                     print('actions_q_values:', actions_q_values)
-                    print('max_diff:', max_diff)
-                    print('min_el:', min_el)
-                    print('threshold_value:', threshold_value)
-                    print('sum_modified_el:', sum_modified_el)
+                    print('sum_modified_el:', sum_p)
                     print('p:', p)
                     raise SystemExit
 
