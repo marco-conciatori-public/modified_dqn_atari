@@ -516,10 +516,11 @@ def learn(env,
                     if t > learning_starts:
                         logger.record_tabular('% lb usati / replay usati', 100 * lb_used / replay_counter)
                 logger.dump_tabular()
-                print('actions_q_values:', actions_q_values)
-                print('p:', p)
-                print('normalized_p:', normalized_p)
-                print('action:', action)
+                if got_reward:
+                    print('actions_q_values:', actions_q_values)
+                    print('p:', p)
+                    print('normalized_p:', normalized_p)
+                    print('action:', action)
 
                 temp_time = now
                 now = time.time()
