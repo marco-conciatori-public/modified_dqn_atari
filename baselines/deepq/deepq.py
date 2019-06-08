@@ -14,7 +14,7 @@ from baselines import logger
 from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
-from baselines import deepq
+from baselines.deepq.build_graph import build_act, build_train
 from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer, LowerBoundReplayBuffer
 from baselines.deepq.utils import ObservationInput
 
@@ -33,7 +33,7 @@ class ActWrapper(object):
     def load_act(path):
         with open(path, "rb") as f:
             model_data, act_params, _, _, _ = cloudpickle.load(f)
-        act = deepq.build_act(**act_params)
+        act = build_act(**act_params)
         sess = tf.Session()
         sess.__enter__()
         with tempfile.TemporaryDirectory() as td:
@@ -236,7 +236,7 @@ def learn(env,
     def make_obs_ph(name):
         return ObservationInput(observation_space, name=name)
 
-    act, train, update_target, debug = deepq.build_train(
+    act, train, update_target, debug = build_train(
         make_obs_ph=make_obs_ph,
         q_func=q_func,
         num_actions=env.action_space.n,
