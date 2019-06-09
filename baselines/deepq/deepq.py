@@ -551,7 +551,7 @@ def learn(env,
 
         file_path = os.path.join('trained_models', file_name)
 
-        act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
+        # act.save_act(rep_buffer=replay_buffer, lb_buffer=lb_buffer, path=file_path)
 
         print('times:')
         for ti in times:
@@ -579,6 +579,6 @@ def learn(env,
 
         print('total time:', str(datetime.timedelta(seconds=tot_time)))
 
-        writer.close()
+        # writer.close()
 
     return act
