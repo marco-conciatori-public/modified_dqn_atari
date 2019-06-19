@@ -1,7 +1,7 @@
 def atari():
     return dict(
         lrschedule='constant',
-        network='cnn',
+        # network='cnn',
         q_coef=0.5,
         ent_coef=0.01,
         max_grad_norm=10,
