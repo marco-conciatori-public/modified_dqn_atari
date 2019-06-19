@@ -1,5 +1,6 @@
 from baselines.common.input import observation_input
 from baselines.common.tf_util import adjust_shape
+import tensorflow as tf
 
 # ================================================================
 # Placeholders
@@ -57,3 +58,5 @@ class ObservationInput(PlaceholderTfInput):
         return self.processed_inpt
 
 
+def cat_entropy_softmax(p0):
+    return - tf.reduce_sum(p0 * tf.log(p0 + 1e-6), axis = 1)

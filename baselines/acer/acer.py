@@ -121,7 +121,9 @@ class Model(object):
         # Calculate losses
         # Entropy
         # entropy = tf.reduce_mean(strip(train_model.pd.entropy(), nenvs, nsteps))
+        print('F:', f)
         entropy = tf.reduce_mean(cat_entropy_softmax(f))
+        print('Entropy:', entropy)
 
         # Policy Graident loss, with truncated importance sampling & bias correction
         v = strip(v, nenvs, nsteps, True)
@@ -352,8 +354,6 @@ def learn(network, env, seed=None, nsteps=20, total_timesteps=int(80e6), q_coef=
     ac_space = env.action_space
 
     nstack = env.nstack
-
-    print('numero di frame per step:', nstack)
 
     model = Model(policy=policy, ob_space=ob_space, ac_space=ac_space, nenvs=nenvs, nsteps=nsteps,
                   ent_coef=ent_coef, q_coef=q_coef, gamma=gamma,
