@@ -394,23 +394,33 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
 
         # q scores for actions which we know were selected in the given state.
         q_t_selected = tf.reduce_sum(q_t * tf.one_hot(act_t_ph, num_actions), 1)
+        print('0 q_t_selected:', q_t_selected)
 
         # compute estimate of best possible value starting from state at t + 1
         if double_q:
             q_tp1_using_online_net = q_func(obs_tp1_input.get(), num_actions, scope="q_func", reuse=True)
             q_tp1_best_using_online_net = tf.argmax(q_tp1_using_online_net, 1)
             q_tp1_best = tf.reduce_sum(q_tp1 * tf.one_hot(q_tp1_best_using_online_net, num_actions), 1)
+            print('1 q_tp1_using_online_net:', q_tp1_using_online_net)
+            print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net)
+            print('3 q_tp1_best:', q_tp1_best)
         else:
             q_tp1_best = tf.reduce_max(q_tp1, 1)
         q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
+        print('4 q_tp1_best_masked:', q_tp1_best_masked)
 
         # compute RHS of bellman equation
         q_t_selected_target = rew_t_ph + gamma * q_tp1_best_masked
+        print('5 q_t_selected_target:', q_t_selected_target)
 
         # compute the error (potentially clipped)
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
         weighted_error = tf.reduce_mean(importance_weights_ph * errors)
+        print('6 td_error:', q_t_selected_target)
+        print('7 errors:', errors)
+        print('8 weighted_error:', weighted_error)
+
 
         # compute optimization op (potentially with gradient clipping)
         if grad_norm_clipping is not None:

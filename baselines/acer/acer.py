@@ -153,6 +153,7 @@ class Model(object):
         # Net loss
         check_shape([loss_policy, loss_q, entropy], [[]] * 3)
         loss = loss_policy + q_coef * loss_q - ent_coef * entropy
+        print('loss:', loss)
 
         if trust_region:
             g = tf.gradients(- (loss_policy - ent_coef * entropy) * nsteps * nenvs, f) #[nenvs * nsteps, nact]
@@ -178,10 +179,12 @@ class Model(object):
             norm_grads_policy = tf.global_norm(grads_policy)
         else:
             grads = tf.gradients(loss, params)
+        print('1 grads:', grads)
 
         if max_grad_norm is not None:
             grads, norm_grads = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
+        print('2 grads:', grads)
         trainer = tf.train.RMSPropOptimizer(learning_rate=LR, decay=rprop_alpha, epsilon=rprop_epsilon)
         _opt_op = trainer.apply_gradients(grads)
 
