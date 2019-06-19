@@ -152,8 +152,6 @@ def learn(env,
         discount factor
     target_network_update_freq: int
         update the target network every `target_network_update_freq` steps.
-    param_noise: bool
-        whether or not to use parameter space noise (https://arxiv.org/abs/1706.01905)
     callback: (locals, globals) -> None
         function called at every steps with state of the algorithm.
         If callback returns true training stops.
@@ -204,11 +202,11 @@ def learn(env,
 
     # Create the replay buffer
     replay_buffer = ReplayBuffer(buffer_size)
-    beta_schedule = None
-    # Create the schedule for exploration starting from 1.
-    exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                 initial_p=1.0,
-                                 final_p=exploration_final_eps)
+    # # Create the schedule for exploration starting from 1.
+    # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+    #                              initial_p=1.0,
+    #                              final_p=exploration_final_eps)
+    exploration = None
 
     # Initialize the parameters and copy them to the target network.
     U.initialize()
@@ -233,6 +231,7 @@ def learn(env,
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
+        update_eps = 1
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -240,19 +239,8 @@ def learn(env,
                     break
             # Take action and update exploration to the newest value
             kwargs = {}
-            if not param_noise:
-                update_eps = exploration.value(t)
-                update_param_noise_threshold = 0.
-            else:
-                update_eps = 0.
-                # Compute the threshold such that the KL divergence between perturbed and non-perturbed
-                # policy is comparable to eps-greedy exploration with eps = exploration.value(t).
-                # See Appendix C.1 in Parameter Space Noise for Exploration, Plappert et al., 2017
-                # for detailed explanation.
-                update_param_noise_threshold = -np.log(1. - exploration.value(t) + exploration.value(t) / float(env.action_space.n))
-                kwargs['reset'] = reset
-                kwargs['update_param_noise_threshold'] = update_param_noise_threshold
-                kwargs['update_param_noise_scale'] = True
+            update_eps = exploration.value(t)
+
             action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             env_action = action
             reset = False
