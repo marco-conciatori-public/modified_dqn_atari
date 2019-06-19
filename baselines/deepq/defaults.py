@@ -20,8 +20,9 @@ def atari():
     return dict(
         # network='cnn',
         lr=1e-4,
-        replay_batch_size=32,
-        lb_batch_size=16,
+        batch_size=32,
+        # replay_batch_size=32,
+        # lb_batch_size=16,
 
         # network_kwargs=network_kwargs,
         # total_timesteps=100000,
