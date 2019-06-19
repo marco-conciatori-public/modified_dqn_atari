@@ -276,7 +276,7 @@ def learn(network, env, seed=None, nsteps=20, total_timesteps=int(80e6), q_coef=
           log_interval=100, buffer_size=50000, replay_ratio=4, replay_start=10000, c=10.0,
           trust_region=True, alpha=0.99, delta=1, load_path=None, **network_kwargs):
 
-    '''
+    """
     Main entrypoint for ACER (Actor-Critic with Experience Replay) algorithm (https://arxiv.org/pdf/1611.01224.pdf)
     Train an agent with given network architecture on a given environment using ACER.
 
@@ -338,7 +338,7 @@ def learn(network, env, seed=None, nsteps=20, total_timesteps=int(80e6), q_coef=
     **network_kwargs:               keyword arguments to the policy / network builder. See baselines.common/policies.py/build_policy and arguments to a particular type of network
                                     For instance, 'mlp' network architecture has arguments num_hidden and num_layers.
 
-    '''
+    """
 
     print("Running Acer Simple")
     print(locals())
@@ -352,6 +352,9 @@ def learn(network, env, seed=None, nsteps=20, total_timesteps=int(80e6), q_coef=
     ac_space = env.action_space
 
     nstack = env.nstack
+
+    print('numero di frame per step:', nstack)
+
     model = Model(policy=policy, ob_space=ob_space, ac_space=ac_space, nenvs=nenvs, nsteps=nsteps,
                   ent_coef=ent_coef, q_coef=q_coef, gamma=gamma,
                   max_grad_norm=max_grad_norm, lr=lr, rprop_alpha=rprop_alpha, rprop_epsilon=rprop_epsilon,
