@@ -5,6 +5,8 @@ import tensorflow as tf
 import zipfile
 import cloudpickle
 import numpy as np
+import time
+import datetime
 
 import baselines.common.tf_util as U
 from baselines.common.tf_util import load_variables, save_variables
@@ -13,7 +15,7 @@ from baselines.common.schedules import LinearSchedule
 from baselines.common import set_global_seeds
 
 from baselines import deepq
-from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from baselines.deepq.replay_buffer import ReplayBuffer
 from baselines.deepq.utils import ObservationInput
 
 from baselines.common.tf_util import get_session
@@ -168,6 +170,8 @@ def learn(env,
     """
     # Create all the functions necessary to train the model
 
+    steps_score_data = []
+
     sess = get_session()
     set_global_seeds(seed)
 
@@ -202,11 +206,13 @@ def learn(env,
 
     # Create the replay buffer
     replay_buffer = ReplayBuffer(buffer_size)
-    # # Create the schedule for exploration starting from 1.
+    # Create the schedule for exploration starting from 1.
     # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
     #                              initial_p=1.0,
     #                              final_p=exploration_final_eps)
-    exploration = None
+    exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+                                 initial_p=0.,
+                                 final_p=exploration_final_eps)
 
     # Initialize the parameters and copy them to the target network.
     U.initialize()
@@ -216,6 +222,7 @@ def learn(env,
     saved_mean_reward = None
     obs = env.reset()
     reset = True
+    num_actions = env.action_space.n
 
     with tempfile.TemporaryDirectory() as td:
         td = checkpoint_path or td
@@ -231,7 +238,7 @@ def learn(env,
             load_variables(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
-        update_eps = 1
+        tot_time = -time.time()
 
         for t in range(total_timesteps):
             if callback is not None:
@@ -241,7 +248,31 @@ def learn(env,
             kwargs = {}
             update_eps = exploration.value(t)
 
-            action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+            actions_q_values = q_values(np.array(obs))[0]
+            index_list = actions_q_values.argsort().tolist()
+            p = []
+            sum_p = 0
+            for i in range(len(index_list)):
+                rank = index_list.index(i)
+                el = pow(rank, exploration.value(t))
+                p.append(el)
+                sum_p += el
+            normalized_p = [el / sum_p for el in p]
+            normalized_p = np.array(normalized_p)
+
+            try:
+                action = np.random.choice(num_actions, p=normalized_p)
+            except ValueError as e:
+                print('Errore:', e)
+                print('type(normalized_p):', type(normalized_p))
+                print('normalized_p:', normalized_p)
+                print('step:', t)
+                print('actions_q_values:', actions_q_values)
+                print('sum_modified_el:', sum_p)
+                print('p:', p)
+                raise SystemExit
+
             env_action = action
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
@@ -283,9 +314,22 @@ def learn(env,
                     save_variables(model_file)
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
+                    steps_score_data.append((t, saved_mean_reward))
+
+        tot_time += time.time()
+
         if model_saved:
             if print_freq is not None:
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
             load_variables(model_file)
+
+    print('steps_score:')
+    for el in steps_score_data:
+        print(el[0])
+    print('score:')
+    for el in steps_score_data:
+        print(el[1])
+
+    print('total time:', str(datetime.timedelta(seconds=tot_time)))
 
     return act
