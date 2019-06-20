@@ -406,6 +406,8 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net)
             print('3 q_tp1_best:', q_tp1_best)
             entropy = tf.reduce_mean(cat_entropy_softmax(q_tp1_using_online_net))
+            print('3.5 entropy:', entropy)
+
         else:
             q_tp1_best = tf.reduce_max(q_tp1, 1)
         q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
@@ -456,6 +458,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
                      q_tp1_using_online_net,
                      q_tp1_best_using_online_net,
                      q_tp1_best,
+                     entropy,
                      q_tp1_best_masked,
                      q_t_selected_target,
                      q_t_selected_target,
