@@ -276,7 +276,13 @@ class Acer():
             logger.record_tabular("mean_episode_length", self.episode_stats.mean_length())
             logger.record_tabular("mean_episode_reward", self.episode_stats.mean_reward())
             for name, val in zip(names_ops, values_ops):
-                logger.record_tabular(name, float(val))
+                try:
+                    logger.record_tabular(name, float(val))
+                except TypeError as e:
+                    print('Errore:', e)
+                    print(name, ':', val)
+                    print(name, ' shape:', val.shape)
+
             logger.dump_tabular()
 
 
