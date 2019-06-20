@@ -72,10 +72,6 @@ class Model(object):
         LR = tf.placeholder(tf.float32, [])
         eps = 1e-6
 
-        print('nenvs:', nenvs)
-        print('nsteps:', nsteps)
-        print('nbatch:', nbatch)
-
         step_ob_placeholder = tf.placeholder(dtype=ob_space.dtype, shape=(nenvs,) + ob_space.shape)
         train_ob_placeholder = tf.placeholder(dtype=ob_space.dtype, shape=(nenvs*(nsteps+1),) + ob_space.shape)
         with tf.variable_scope('acer_model', reuse=tf.AUTO_REUSE):
@@ -125,9 +121,7 @@ class Model(object):
         # Calculate losses
         # Entropy
         # entropy = tf.reduce_mean(strip(train_model.pd.entropy(), nenvs, nsteps))
-        print('F:', f)
         entropy = tf.reduce_mean(cat_entropy_softmax(f))
-        print('Entropy:', entropy)
 
         # Policy Graident loss, with truncated importance sampling & bias correction
         v = strip(v, nenvs, nsteps, True)
@@ -145,7 +139,7 @@ class Model(object):
         logf_bc = tf.log(f + eps) # / (f_old + eps)
         check_shape([adv_bc, logf_bc], [[nenvs * nsteps, nact]]*2)
         gain_bc = tf.reduce_sum(logf_bc * tf.stop_gradient(adv_bc * tf.nn.relu(1.0 - (c / (rho + eps))) * f), axis = 1) #IMP: This is sum, as expectation wrt f
-        loss_bc= -tf.reduce_mean(gain_bc)
+        loss_bc = -tf.reduce_mean(gain_bc)
 
         loss_policy = loss_f + loss_bc
 
@@ -157,7 +151,6 @@ class Model(object):
         # Net loss
         check_shape([loss_policy, loss_q, entropy], [[]] * 3)
         loss = loss_policy + q_coef * loss_q - ent_coef * entropy
-        print('loss:', loss)
 
         if trust_region:
             g = tf.gradients(- (loss_policy - ent_coef * entropy) * nsteps * nenvs, f) #[nenvs * nsteps, nact]
@@ -183,12 +176,10 @@ class Model(object):
             norm_grads_policy = tf.global_norm(grads_policy)
         else:
             grads = tf.gradients(loss, params)
-        # print('1 grads:', grads)
 
         if max_grad_norm is not None:
             grads, norm_grads = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
-        # print('2 grads:', grads)
         trainer = tf.train.RMSPropOptimizer(learning_rate=LR, decay=rprop_alpha, epsilon=rprop_epsilon)
         _opt_op = trainer.apply_gradients(grads)
 
@@ -280,7 +271,7 @@ class Acer():
                     logger.record_tabular(name, float(val))
                 except TypeError as e:
                     print('Errore:', e)
-                    print(name, ':', val)
+                    # print(name, ':', val)
                     print(name, ' shape:', val.shape)
 
             logger.dump_tabular()

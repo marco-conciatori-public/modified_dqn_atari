@@ -95,6 +95,7 @@ The functions in this file can are used to create the following functions:
 """
 import tensorflow as tf
 import baselines.common.tf_util as U
+from baselines.deepq.utils import cat_entropy_softmax
 
 
 def scope_vars(scope, trainable_only=False):
@@ -404,6 +405,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             print('1 q_tp1_using_online_net:', q_tp1_using_online_net)
             print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net)
             print('3 q_tp1_best:', q_tp1_best)
+            entropy = tf.reduce_mean(cat_entropy_softmax(q_tp1_using_online_net))
         else:
             q_tp1_best = tf.reduce_max(q_tp1, 1)
         q_tp1_best_masked = (1.0 - done_mask_ph) * q_tp1_best
@@ -416,7 +418,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         # compute the error (potentially clipped)
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
-        weighted_error = tf.reduce_mean(importance_weights_ph * errors)
+        weighted_error = tf.reduce_mean(importance_weights_ph * errors) - 0.01 * entropy
         print('6 td_error:', td_error)
         print('7 errors:', errors)
         print('8 weighted_error:', weighted_error)
