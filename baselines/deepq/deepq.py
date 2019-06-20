@@ -293,7 +293,7 @@ def learn(env,
                 weights, batch_idxes = np.ones_like(rewards), None
                 [td_error, q_t_selected, q_tp1_using_online_net, q_tp1_best_using_online_net, q_tp1_best, q_tp1_best_masked, q_t_selected_target, q_t_selected_target, errors, weighted_error] = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 print('0 q_t_selected:', q_t_selected)
-                print('1 q_tp1_using_online_net:', q_tp1_using_online_net(np.array(obs)))
+                print('1 q_tp1_using_online_net:', q_tp1_using_online_net)
                 print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net)
                 print('3 q_tp1_best:', q_tp1_best)
                 print('4 q_tp1_best_masked:', q_tp1_best_masked)
