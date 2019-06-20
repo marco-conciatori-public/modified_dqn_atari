@@ -72,6 +72,8 @@ class Model(object):
         LR = tf.placeholder(tf.float32, [])
         eps = 1e-6
 
+        print('nbatch:', nbatch)
+
         step_ob_placeholder = tf.placeholder(dtype=ob_space.dtype, shape=(nenvs,) + ob_space.shape)
         train_ob_placeholder = tf.placeholder(dtype=ob_space.dtype, shape=(nenvs*(nsteps+1),) + ob_space.shape)
         with tf.variable_scope('acer_model', reuse=tf.AUTO_REUSE):
