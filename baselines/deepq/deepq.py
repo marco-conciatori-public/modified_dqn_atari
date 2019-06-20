@@ -248,6 +248,7 @@ def learn(env,
             kwargs = {}
             update_eps = exploration.value(t)
 
+            print('np.array(obs):', np.array(obs))
             alt_q_values = q_func(np.array(obs), num_actions, scope="q_func", reuse=True)
             print('alt_q_values:', alt_q_values)
 
