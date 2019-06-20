@@ -417,7 +417,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
         weighted_error = tf.reduce_mean(importance_weights_ph * errors)
-        print('6 td_error:', q_t_selected_target)
+        print('6 td_error:', td_error)
         print('7 errors:', errors)
         print('8 weighted_error:', weighted_error)
 
@@ -449,7 +449,17 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
                 done_mask_ph,
                 importance_weights_ph
             ],
-            outputs=td_error,
+            outputs=[td_error,
+                     q_t_selected,
+                     q_tp1_using_online_net,
+                     q_tp1_best_using_online_net,
+                     q_tp1_best,
+                     q_tp1_best_masked,
+                     q_t_selected_target,
+                     q_t_selected_target,
+                     errors,
+                     weighted_error
+                     ],
             updates=[optimize_expr]
         )
         update_target = U.function([], [], updates=[update_target_expr])

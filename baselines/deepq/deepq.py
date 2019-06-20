@@ -291,7 +291,16 @@ def learn(env,
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
                 weights, batch_idxes = np.ones_like(rewards), None
-                td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                [td_error, q_t_selected, q_tp1_using_online_net, q_tp1_best_using_online_net, q_tp1_best, q_tp1_best_masked, q_t_selected_target, q_t_selected_target, errors, weighted_error] = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                print('0 q_t_selected:', q_t_selected)
+                print('1 q_tp1_using_online_net:', q_tp1_using_online_net(np.array(obs)))
+                print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net)
+                print('3 q_tp1_best:', q_tp1_best)
+                print('4 q_tp1_best_masked:', q_tp1_best_masked)
+                print('5 q_t_selected_target:', q_t_selected_target)
+                print('6 td_error:', q_t_selected_target)
+                print('7 errors:', errors)
+                print('8 weighted_error:', weighted_error)
 
             if t > learning_starts and t % target_network_update_freq == 0:
                 # Update target network periodically.
