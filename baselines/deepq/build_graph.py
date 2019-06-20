@@ -385,8 +385,8 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         importance_weights_ph = tf.placeholder(tf.float32, [None], name="weight")
 
         # q network evaluation
-        print('obs_t_input.get().shape:', obs_t_input.get().shape)
-        print('obs_t_input.get():', obs_t_input.get())
+        print('++++++++++++++++++++++++++ obs_t_input.get().shape:', obs_t_input.get().shape)
+        print('++++++++++++++++++++++++++ obs_t_input.get():', obs_t_input.get())
         q_t = q_func(obs_t_input.get(), num_actions, scope="q_func", reuse=True)  # reuse parameters from act
         q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=tf.get_variable_scope().name + "/q_func")
 
