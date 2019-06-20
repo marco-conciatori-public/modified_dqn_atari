@@ -248,9 +248,9 @@ def learn(env,
             kwargs = {}
             update_eps = exploration.value(t)
 
-            print('np.array(obs):', np.array(obs))
-            # alt_q_values = q_func(np.array(obs).shape, num_actions, scope="q_func", reuse=True)
-            # print('alt_q_values:', alt_q_values)
+            print('np.array(obs).shape:', np.array(obs).shape)
+            # alt_q_values = q_func(np.array(obs), num_actions, scope="q_func", reuse=True)
+            # print('alt_q_values.shape:', alt_q_values.shape)
 
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
