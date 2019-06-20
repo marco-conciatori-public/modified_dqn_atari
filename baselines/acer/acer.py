@@ -55,6 +55,7 @@ def q_retrace(R, D, q_i, v, rho_i, nenvs, nsteps, gamma):
 #     # assume 0 <= eps_clip <= 1
 #     return tf.minimum(1 + eps_clip, tf.maximum(1 - eps_clip, ratio))
 
+
 class Model(object):
     def __init__(self, policy, ob_space, ac_space, nenvs, nsteps, ent_coef, q_coef, gamma, max_grad_norm, lr,
                  rprop_alpha, rprop_epsilon, total_timesteps, lrschedule,
@@ -77,7 +78,6 @@ class Model(object):
 
             step_model = policy(nbatch=nenvs, nsteps=1, observ_placeholder=step_ob_placeholder, sess=sess)
             train_model = policy(nbatch=nbatch, nsteps=nsteps, observ_placeholder=train_ob_placeholder, sess=sess)
-
 
         params = find_trainable_variables("acer_model")
         print("Params {}".format(len(params)))
@@ -179,12 +179,12 @@ class Model(object):
             norm_grads_policy = tf.global_norm(grads_policy)
         else:
             grads = tf.gradients(loss, params)
-        print('1 grads:', grads)
+        # print('1 grads:', grads)
 
         if max_grad_norm is not None:
             grads, norm_grads = tf.clip_by_global_norm(grads, max_grad_norm)
         grads = list(zip(grads, params))
-        print('2 grads:', grads)
+        # print('2 grads:', grads)
         trainer = tf.train.RMSPropOptimizer(learning_rate=LR, decay=rprop_alpha, epsilon=rprop_epsilon)
         _opt_op = trainer.apply_gradients(grads)
 
@@ -195,14 +195,16 @@ class Model(object):
         lr = Scheduler(v=lr, nvalues=total_timesteps, schedule=lrschedule)
 
         # Ops/Summaries to run, and their names for logging
-        run_ops = [_train, loss, loss_q, entropy, loss_policy, loss_f, loss_bc, ev, norm_grads]
-        names_ops = ['loss', 'loss_q', 'entropy', 'loss_policy', 'loss_f', 'loss_bc', 'explained_variance',
-                     'norm_grads']
-        if trust_region:
-            run_ops = run_ops + [norm_grads_q, norm_grads_policy, avg_norm_grads_f, avg_norm_k, avg_norm_g, avg_norm_k_dot_g,
-                                 avg_norm_adj]
-            names_ops = names_ops + ['norm_grads_q', 'norm_grads_policy', 'avg_norm_grads_f', 'avg_norm_k', 'avg_norm_g',
-                                     'avg_norm_k_dot_g', 'avg_norm_adj']
+        run_ops = [_train, loss, loss_q, entropy, loss_policy, loss_f, loss_bc, norm_grads, f]
+        names_ops = ['loss', 'loss_q', 'entropy', 'loss_policy', 'loss_f', 'loss_bc', 'norm_grads', 'f']
+        # run_ops = [_train, loss, loss_q, entropy, loss_policy, loss_f, loss_bc, ev, norm_grads]
+        # names_ops = ['loss', 'loss_q', 'entropy', 'loss_policy', 'loss_f', 'loss_bc', 'explained_variance',
+        #              'norm_grads']
+        # if trust_region:
+        #     run_ops = run_ops + [norm_grads_q, norm_grads_policy, avg_norm_grads_f, avg_norm_k, avg_norm_g, avg_norm_k_dot_g,
+        #                          avg_norm_adj]
+        #     names_ops = names_ops + ['norm_grads_q', 'norm_grads_policy', 'avg_norm_grads_f', 'avg_norm_k', 'avg_norm_g',
+        #                              'avg_norm_k_dot_g', 'avg_norm_adj']
 
         def train(obs, actions, rewards, dones, mus, states, masks, steps):
             cur_lr = lr.value_steps(steps)
@@ -217,8 +219,6 @@ class Model(object):
 
         def _step(observation, **kwargs):
             return step_model._evaluate([step_model.action, step_model_p, step_model.state], observation, **kwargs)
-
-
 
         self.train = train
         self.save = functools.partial(save_variables, sess=sess, variables=params)
