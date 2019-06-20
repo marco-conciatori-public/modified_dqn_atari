@@ -248,8 +248,13 @@ def learn(env,
             kwargs = {}
             update_eps = exploration.value(t)
 
+            alt_q_values = q_func(np.array(obs), num_actions, scope="q_func", reuse=True)
+            print('alt_q_values:', alt_q_values)
+
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
+            print('actions_q_values:', actions_q_values)
+
             index_list = actions_q_values.argsort().tolist()
             p = []
             sum_p = 0
