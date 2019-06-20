@@ -461,7 +461,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
                      entropy,
                      q_tp1_best_masked,
                      q_t_selected_target,
-                     q_t_selected_target,
+                     td_error,
                      errors,
                      weighted_error
                      ],
