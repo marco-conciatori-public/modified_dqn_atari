@@ -296,6 +296,8 @@ def learn(env,
                 print('1 q_tp1_using_online_net:', q_tp1_using_online_net.shape)
                 print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net.shape)
                 print('3 q_tp1_best:', q_tp1_best.shape)
+
+                print('1 q_tp1_using_online_net:', q_tp1_using_online_net)
                 print('3.1 partial_entropy shape:', partial_entropy.shape)
                 print('3.1 partial_entropy:', partial_entropy)
                 print('3.5 entropy shape:', entropy.shape)
