@@ -291,7 +291,7 @@ def learn(env,
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
                 weights, batch_idxes = np.ones_like(rewards), None
-                [td_error, q_t_selected, q_tp1_using_online_net, q_tp1_best_using_online_net, q_tp1_best, entropy, q_tp1_best_masked, q_t_selected_target, td_error, errors, weighted_error] = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                [td_error, q_t_selected, q_tp1_using_online_net, q_tp1_best_using_online_net, q_tp1_best, entropy, q_tp1_best_masked, q_t_selected_target, td_error, errors, pre_weighted_error, weighted_error] = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 print('0 q_t_selected:', q_t_selected.shape)
                 print('1 q_tp1_using_online_net:', q_tp1_using_online_net.shape)
                 print('2 q_tp1_best_using_online_net:', q_tp1_best_using_online_net.shape)
@@ -302,7 +302,8 @@ def learn(env,
                 print('5 q_t_selected_target:', q_t_selected_target.shape)
                 print('6 td_error:', td_error.shape)
                 print('7 errors:', errors.shape)
-                print('8 weighted_error:', weighted_error)
+                print('8 pre_weighted_error:', pre_weighted_error)
+                print('9 weighted_error:', weighted_error)
 
             if t > learning_starts and t % target_network_update_freq == 0:
                 # Update target network periodically.

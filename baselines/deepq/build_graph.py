@@ -420,7 +420,8 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         # compute the error (potentially clipped)
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
-        weighted_error = tf.reduce_mean(importance_weights_ph * errors) - 0.01 * entropy
+        pre_weighted_error = tf.reduce_mean(importance_weights_ph * errors)
+        weighted_error = pre_weighted_error - 0.01 * entropy
         print('6 td_error:', td_error)
         print('7 errors:', errors)
         print('8 weighted_error:', weighted_error)
@@ -463,6 +464,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
                      q_t_selected_target,
                      td_error,
                      errors,
+                     pre_weighted_error,
                      weighted_error
                      ],
             updates=[optimize_expr]
