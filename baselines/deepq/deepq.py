@@ -308,6 +308,7 @@ def learn(env,
                 print('7 errors:', errors.shape)
                 print('8 pre_weighted_error:', pre_weighted_error)
                 print('9 weighted_error:', weighted_error)
+                raise SystemExit
 
             if t > learning_starts and t % target_network_update_freq == 0:
                 # Update target network periodically.
