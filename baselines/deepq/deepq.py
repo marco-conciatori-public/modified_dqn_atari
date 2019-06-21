@@ -305,7 +305,7 @@ def learn(env,
                 print('entropy shape:', entropy.shape)
                 print('entropy:', entropy)
                 print('weighted_error:', weighted_error)
-                raise SystemExit
+                # raise SystemExit
 
             if t > learning_starts and t % target_network_update_freq == 0:
                 # Update target network periodically.
