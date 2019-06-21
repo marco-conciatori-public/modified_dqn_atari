@@ -291,11 +291,9 @@ def learn(env,
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
                 weights, batch_idxes = np.ones_like(rewards), None
-                td_error, q_tp1_using_online_net, partial_entropy_0, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                td_error, q_tp1_using_online_net, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights)
                 print('q_tp1_using_online_net:', q_tp1_using_online_net.shape)
                 print('q_tp1_using_online_net:', q_tp1_using_online_net)
-                print('partial_entropy_0 shape:', partial_entropy_0.shape)
-                print('partial_entropy_0:', partial_entropy_0)
                 print('partial_entropy_1 shape:', partial_entropy_1.shape)
                 print('partial_entropy_1:', partial_entropy_1)
                 print('partial_entropy_2 shape:', partial_entropy_2.shape)
