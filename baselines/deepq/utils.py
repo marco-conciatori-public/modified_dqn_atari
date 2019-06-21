@@ -67,7 +67,7 @@ def cat_entropy_softmax(p0):
     print('me.shape:', me.shape)
 
     if me < 0:
-        temp_tensor = tf.fill(partial_result_0.shape, - min_el)
+        temp_tensor = tf.fill(partial_result_0.shape, - me)
         partial_result_0 = tf.add(partial_result_0, temp_tensor)
     partial_result_1 = tf.log(partial_result_0 + 1e-6)
     partial_result_2 = p0 * partial_result_1
