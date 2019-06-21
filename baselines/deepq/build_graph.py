@@ -401,13 +401,14 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             q_tp1_using_online_net = q_func(obs_tp1_input.get(), num_actions, scope="q_func", reuse=True)
             q_tp1_best_using_online_net = tf.argmax(q_tp1_using_online_net, 1)
             q_tp1_best = tf.reduce_sum(q_tp1 * tf.one_hot(q_tp1_best_using_online_net, num_actions), 1)
-            print('1 q_tp1_using_online_net:', q_tp1_using_online_net)
-            partial_entropy_1, partial_entropy_2, partial_entropy_3 = cat_entropy_softmax(q_tp1_using_online_net)
+            print('q_tp1_using_online_net:', q_tp1_using_online_net)
+            partial_entropy_0, partial_entropy_1, partial_entropy_2, partial_entropy_3 = cat_entropy_softmax(q_tp1_using_online_net)
             entropy = tf.reduce_mean(partial_entropy_3)
-            print('2.1 partial_entropy:', partial_entropy_1)
-            print('2.2 partial_entropy:', partial_entropy_2)
-            print('2.3 partial_entropy:', partial_entropy_3)
-            print('2.5 entropy:', entropy)
+            print('partial_entropy_0:', partial_entropy_0)
+            print('partial_entropy_1:', partial_entropy_1)
+            print('partial_entropy_2:', partial_entropy_2)
+            print('partial_entropy_3:', partial_entropy_3)
+            print('entropy:', entropy)
 
         else:
             q_tp1_best = tf.reduce_max(q_tp1, 1)
@@ -421,7 +422,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         errors = U.huber_loss(td_error)
         pre_weighted_error = tf.reduce_mean(importance_weights_ph * errors)
         weighted_error = pre_weighted_error - 0.01 * entropy
-        print('3 weighted_error:', weighted_error)
+        print('weighted_error:', weighted_error)
 
 
         # compute optimization op (potentially with gradient clipping)
@@ -453,6 +454,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             ],
             outputs=[td_error,
                      q_tp1_using_online_net,
+                     partial_entropy_0,
                      partial_entropy_1,
                      partial_entropy_2,
                      partial_entropy_3,
