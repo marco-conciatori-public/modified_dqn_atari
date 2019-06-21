@@ -59,17 +59,7 @@ class ObservationInput(PlaceholderTfInput):
 
 
 def cat_entropy_softmax(p0):
-    min_el = tf.reduce_min(p0)
-    partial_result_0 = p0
-    # zero = tf.constant(0.0)
-    print('min_el.shape:', min_el.shape)
-    me = min_el[0]
-    print('me.shape:', me.shape)
-
-    if me < 0:
-        temp_tensor = tf.fill(partial_result_0.shape, - me)
-        partial_result_0 = tf.add(partial_result_0, temp_tensor)
-    partial_result_1 = tf.log(partial_result_0 + 1e-6)
+    partial_result_1 = tf.log(p0 + 1e-6)
     partial_result_2 = p0 * partial_result_1
     result = - tf.reduce_sum(partial_result_2, axis=1)
-    return partial_result_0, partial_result_1, partial_result_2, result
+    return partial_result_1, partial_result_2, result

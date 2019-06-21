@@ -260,14 +260,14 @@ def learn(env,
                 p.append(el)
                 sum_p += el
             normalized_p = [el / sum_p for el in p]
-            normalized_p = np.array(normalized_p)
+            normalized_p_numpy = np.array(normalized_p)
 
             try:
-                action = np.random.choice(num_actions, p=normalized_p)
+                action = np.random.choice(num_actions, p=normalized_p_numpy)
             except ValueError as e:
                 print('Errore:', e)
-                print('type(normalized_p):', type(normalized_p))
-                print('normalized_p:', normalized_p)
+                print('type(normalized_p):', type(normalized_p_numpy))
+                print('normalized_p:', normalized_p_numpy)
                 print('step:', t)
                 print('actions_q_values:', actions_q_values)
                 print('sum_modified_el:', sum_p)
@@ -278,7 +278,7 @@ def learn(env,
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
-            replay_buffer.add(obs, action, rew, new_obs, float(done))
+            replay_buffer.add(obs, normalized_p, rew, new_obs, float(done))
             obs = new_obs
 
             episode_rewards[-1] += rew
@@ -322,7 +322,7 @@ def learn(env,
 
                 print('actions_q_values:', actions_q_values)
                 print('p:', p)
-                print('normalized_p:', normalized_p)
+                print('normalized_p:', normalized_p_numpy)
                 print('action:', action)
 
             if (checkpoint_freq is not None and t > learning_starts and

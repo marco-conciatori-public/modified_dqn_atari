@@ -421,7 +421,8 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
         pre_weighted_error = tf.reduce_mean(importance_weights_ph * errors)
-        weighted_error = pre_weighted_error - 0.01 * entropy
+        # weighted_error = pre_weighted_error - 0.01 * entropy
+        weighted_error = pre_weighted_error
         print('weighted_error:', weighted_error)
 
 
