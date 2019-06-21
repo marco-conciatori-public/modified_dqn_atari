@@ -322,8 +322,9 @@ def learn(env,
                 print('normalized_p:', normalized_p_numpy)
                 print('action:', action)
 
-                print('entropy:', entropy)
-                print('weighted_error:', weighted_error)
+                if t > learning_starts + train_freq:
+                    print('entropy:', entropy)
+                    print('weighted_error:', weighted_error)
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
