@@ -380,7 +380,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         # set up placeholders
         obs_t_input = make_obs_ph("obs_t")
         act_t_ph = tf.placeholder(tf.int32, [None], name="action")
-        actions_probability_ph = tf.placeholder(tf.float32, num_actions, name="actions_probability")
+        actions_probability_ph = tf.placeholder(tf.float32, shape=(32, num_actions), name="actions_probability")
         rew_t_ph = tf.placeholder(tf.float32, [None], name="reward")
         obs_tp1_input = make_obs_ph("obs_tp1")
         done_mask_ph = tf.placeholder(tf.float32, [None], name="done")
