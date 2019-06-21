@@ -59,4 +59,7 @@ class ObservationInput(PlaceholderTfInput):
 
 
 def cat_entropy_softmax(p0):
-    return - tf.reduce_sum(p0 * tf.log(p0 + 1e-6), axis = 1)
+    partial_result_1 = tf.log(p0 + 1e-6)
+    partial_result_2 = p0 * partial_result_1
+    result = - tf.reduce_sum(partial_result_2, axis=1)
+    return partial_result_1, partial_result_2, result
