@@ -278,7 +278,7 @@ def learn(env,
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
-            replay_buffer.add(obs, normalized_p, rew, new_obs, float(done))
+            replay_buffer.add(obs, action, rew, new_obs, float(done), normalized_p)
             obs = new_obs
 
             episode_rewards[-1] += rew
@@ -289,11 +289,11 @@ def learn(env,
 
             if t > learning_starts and t % train_freq == 0:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
-                obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
+                obses_t, actions, rewards, obses_tp1, dones, actions_probability = replay_buffer.sample(batch_size)
                 weights, batch_idxes = np.ones_like(rewards), None
-                td_error, q_tp1_using_online_net, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights)
-                print('q_tp1_using_online_net:', q_tp1_using_online_net.shape)
-                print('q_tp1_using_online_net:', q_tp1_using_online_net)
+                td_error, actions_probability_ph, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights, actions_probability)
+                print('q_tp1_using_online_net:', actions_probability_ph.shape)
+                print('q_tp1_using_online_net:', actions_probability_ph)
                 print('partial_entropy_1 shape:', partial_entropy_1.shape)
                 print('partial_entropy_1:', partial_entropy_1)
                 print('partial_entropy_2 shape:', partial_entropy_2.shape)
