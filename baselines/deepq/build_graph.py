@@ -380,7 +380,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         # set up placeholders
         obs_t_input = make_obs_ph("obs_t")
         act_t_ph = tf.placeholder(tf.int32, [None], name="action")
-        actions_probability_ph = tf.placeholder(tf.float32, [None], name="actions_probability")
+        actions_probability_ph = tf.placeholder(tf.float32, num_actions, name="actions_probability")
         rew_t_ph = tf.placeholder(tf.float32, [None], name="reward")
         obs_tp1_input = make_obs_ph("obs_tp1")
         done_mask_ph = tf.placeholder(tf.float32, [None], name="done")
@@ -402,6 +402,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             q_tp1_using_online_net = q_func(obs_tp1_input.get(), num_actions, scope="q_func", reuse=True)
             q_tp1_best_using_online_net = tf.argmax(q_tp1_using_online_net, 1)
             q_tp1_best = tf.reduce_sum(q_tp1 * tf.one_hot(q_tp1_best_using_online_net, num_actions), 1)
+            print('act_t_ph:', act_t_ph)
             print('actions_probability_ph:', actions_probability_ph)
             partial_entropy_1, partial_entropy_2, partial_entropy_3 = cat_entropy_softmax(actions_probability_ph)
             entropy = tf.reduce_mean(partial_entropy_3)
@@ -424,7 +425,6 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         # weighted_error = pre_weighted_error - 0.01 * entropy
         weighted_error = pre_weighted_error
         print('weighted_error:', weighted_error)
-
 
         # compute optimization op (potentially with gradient clipping)
         if grad_norm_clipping is not None:
