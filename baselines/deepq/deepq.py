@@ -291,18 +291,17 @@ def learn(env,
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 obses_t, actions, rewards, obses_tp1, dones, actions_probability = replay_buffer.sample(batch_size)
                 weights, batch_idxes = np.ones_like(rewards), None
-                td_error, actions_probability_ph, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights, actions_probability)
-                print('q_tp1_using_online_net:', actions_probability_ph.shape)
-                print('q_tp1_using_online_net:', actions_probability_ph)
-                print('partial_entropy_1 shape:', partial_entropy_1.shape)
-                print('partial_entropy_1:', partial_entropy_1)
-                print('partial_entropy_2 shape:', partial_entropy_2.shape)
-                print('partial_entropy_2:', partial_entropy_2)
-                print('partial_entropy_3 shape:', partial_entropy_3.shape)
-                print('partial_entropy_3:', partial_entropy_3)
-                print('entropy shape:', entropy.shape)
-                print('entropy:', entropy)
-                print('weighted_error:', weighted_error)
+                actions_probability_ph, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights, actions_probability)
+                # print('q_tp1_using_online_net:', actions_probability_ph.shape)
+                # print('q_tp1_using_online_net:', actions_probability_ph)
+                # print('partial_entropy_1 shape:', partial_entropy_1.shape)
+                # print('partial_entropy_1:', partial_entropy_1)
+                # print('partial_entropy_2 shape:', partial_entropy_2.shape)
+                # print('partial_entropy_2:', partial_entropy_2)
+                # print('partial_entropy_3 shape:', partial_entropy_3.shape)
+                # print('partial_entropy_3:', partial_entropy_3)
+                # print('entropy shape:', entropy.shape)
+
                 # raise SystemExit
 
             if t > learning_starts and t % target_network_update_freq == 0:
@@ -322,6 +321,9 @@ def learn(env,
                 print('p:', p)
                 print('normalized_p:', normalized_p_numpy)
                 print('action:', action)
+
+                print('entropy:', entropy)
+                print('weighted_error:', weighted_error)
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):

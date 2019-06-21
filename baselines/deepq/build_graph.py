@@ -454,8 +454,7 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
                 importance_weights_ph,
                 actions_probability_ph
             ],
-            outputs=[td_error,
-                     actions_probability_ph,
+            outputs=[actions_probability_ph,
                      partial_entropy_1,
                      partial_entropy_2,
                      partial_entropy_3,
