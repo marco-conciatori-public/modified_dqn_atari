@@ -42,6 +42,8 @@ def atari():
         param_noise=False,
         # seed=None,
         callback=None,
+
+        entropy_coeff=0.01,
     )
 
 def retro():

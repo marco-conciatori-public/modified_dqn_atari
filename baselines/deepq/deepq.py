@@ -113,6 +113,7 @@ def learn(env,
           param_noise=False,
           callback=None,
           load_path=None,
+          entropy_coeff=1,
           **network_kwargs):
     """Train a deepq model.
 
@@ -191,7 +192,8 @@ def learn(env,
         optimizer=tf.train.AdamOptimizer(learning_rate=lr),
         gamma=gamma,
         grad_norm_clipping=10,
-        param_noise=param_noise
+        param_noise=param_noise,
+        entropy_coeff=entropy_coeff
     )
 
     q_values = debug['q_values']
