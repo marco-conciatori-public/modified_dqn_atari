@@ -261,6 +261,15 @@ def learn(env,
                 el = pow(rank, exploration.value(t))
                 p.append(el)
                 sum_p += el
+
+            # check for NaN and inf values
+            if not np.all(np.isfinite(p)):
+                print('p è NaN o inf')
+                print('p:', p)
+            if not np.all(np.isfinite(normalized_p)):
+                print('normalized_p è NaN o inf')
+                print('normalized_p:', normalized_p)
+
             normalized_p = [el / sum_p for el in p]
             normalized_p_numpy = np.array(normalized_p)
 
@@ -319,14 +328,14 @@ def learn(env,
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
 
-                print('actions_q_values:', actions_q_values)
-                print('p:', p)
-                print('normalized_p:', normalized_p_numpy)
-                print('action:', action)
-
-                if t > learning_starts + train_freq:
-                    print('entropy:', entropy)
-                    print('weighted_error:', weighted_error)
+                # print('actions_q_values:', actions_q_values)
+                # print('p:', p)
+                # print('normalized_p:', normalized_p_numpy)
+                # print('action:', action)
+                #
+                # if t > learning_starts + train_freq:
+                #     print('entropy:', entropy)
+                #     print('weighted_error:', weighted_error)
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
