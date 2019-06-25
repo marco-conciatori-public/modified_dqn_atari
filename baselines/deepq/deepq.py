@@ -253,8 +253,8 @@ def learn(env,
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
             entropy_train_values = softmax1D(actions_q_values).tolist()
-            print('entropy_train_values:', entropy_train_values)
-            print('sum(entropy_train_values):', np.sum(entropy_train_values))
+            # print('entropy_train_values:', entropy_train_values)
+            # print('sum(entropy_train_values):', np.sum(entropy_train_values))
 
             index_list = actions_q_values.argsort().tolist()
             p = []
