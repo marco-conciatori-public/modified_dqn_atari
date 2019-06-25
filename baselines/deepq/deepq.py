@@ -255,17 +255,18 @@ def learn(env,
             entropy_train_values = softmax1D(actions_q_values).tolist()
             # print('entropy_train_values:', entropy_train_values)
             # print('sum(entropy_train_values):', np.sum(entropy_train_values))
+            print('actions_q_values:', actions_q_values)
 
             index_list = actions_q_values.argsort().tolist()
             p = []
             sum_p = 0
-            for i in range(len(index_list)):
-                rank = index_list.index(i)
-                el = pow(rank, exploration.value(t))
+            for rank inindex_list:
+                el = pow(rank + 1e6, exploration.value(t))
                 p.append(el)
                 sum_p += el
             normalized_p = [el / sum_p for el in p]
             normalized_p_numpy = np.array(normalized_p)
+            print('normalized_p:', normalized_p)
 
             # check for NaN and inf values
             if not np.all(np.isfinite(p)):
