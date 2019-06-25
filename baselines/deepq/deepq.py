@@ -16,7 +16,7 @@ from baselines.common import set_global_seeds
 
 from baselines import deepq
 from baselines.deepq.replay_buffer import ReplayBuffer
-from baselines.deepq.utils import ObservationInput
+from baselines.deepq.utils import ObservationInput, softmax1D
 
 from baselines.common.tf_util import get_session
 from baselines.deepq.models import build_q_func
@@ -252,7 +252,9 @@ def learn(env,
 
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
-            entropy_train_values = actions_q_values.tolist()
+            entropy_train_values = softmax1D(actions_q_values).tolist()
+            print('entropy_train_values:', entropy_train_values)
+            print('sum(entropy_train_values):', np.sum(entropy_train_values))
 
             index_list = actions_q_values.argsort().tolist()
             p = []

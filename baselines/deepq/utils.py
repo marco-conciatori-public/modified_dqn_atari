@@ -1,6 +1,7 @@
 from baselines.common.input import observation_input
 from baselines.common.tf_util import adjust_shape
 import tensorflow as tf
+import numpy as np
 
 # ================================================================
 # Placeholders
@@ -63,3 +64,9 @@ def cat_entropy_softmax(p0):
     partial_result_2 = p0 * partial_result_1
     result = - tf.reduce_sum(partial_result_2, axis=1)
     return partial_result_1, partial_result_2, result
+
+
+def softmax1D(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
