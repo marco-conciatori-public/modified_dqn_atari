@@ -252,6 +252,7 @@ def learn(env,
 
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
+            entropy_train_values = actions_q_values.tolist()
 
             index_list = actions_q_values.argsort().tolist()
             p = []
@@ -288,7 +289,7 @@ def learn(env,
             reset = False
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
-            replay_buffer.add(obs, action, rew, new_obs, float(done), normalized_p)
+            replay_buffer.add(obs, action, rew, new_obs, float(done), entropy_train_values)
             obs = new_obs
 
             episode_rewards[-1] += rew
