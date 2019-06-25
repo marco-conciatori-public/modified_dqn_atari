@@ -269,9 +269,11 @@ def learn(env,
             if not np.all(np.isfinite(p)):
                 print('p è NaN o inf')
                 print('p:', p)
+                print('actions_q_values:', actions_q_values)
             if not np.all(np.isfinite(normalized_p)):
                 print('normalized_p è NaN o inf')
                 print('normalized_p:', normalized_p)
+                print('actions_q_values:', actions_q_values)
 
             try:
                 action = np.random.choice(num_actions, p=normalized_p_numpy)
