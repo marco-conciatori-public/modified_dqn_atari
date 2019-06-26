@@ -260,7 +260,7 @@ def learn(env,
             index_list = actions_q_values.argsort().tolist()
             p = []
             sum_p = 0
-            for rank inindex_list:
+            for rank in index_list:
                 el = pow(rank + 1e6, exploration.value(t))
                 p.append(el)
                 sum_p += el
