@@ -262,7 +262,7 @@ def learn(env,
             sum_p = 0
             for i in range(len(index_list)):
                 rank = index_list.index(i)
-                el = pow(rank + 1e6, exploration.value(t))
+                el = pow(rank + 1e-6, exploration.value(t))
                 p.append(el)
                 sum_p += el
             normalized_p = [el / sum_p for el in p]
