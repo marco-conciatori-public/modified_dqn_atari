@@ -101,7 +101,7 @@ def learn(env,
           total_timesteps=100000,
           buffer_size=50000,
           exploration_fraction=0.1,
-          exploration_final_eps=100,
+          exploration_final_eps=0.02,
           train_freq=1,
           batch_size=32,
           print_freq=100,
@@ -209,12 +209,12 @@ def learn(env,
     # Create the replay buffer
     replay_buffer = ReplayBuffer(buffer_size)
     # Create the schedule for exploration starting from 1.
-    # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-    #                              initial_p=1.0,
-    #                              final_p=exploration_final_eps)
     exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
-                                 initial_p=0.,
+                                 initial_p=1.0,
                                  final_p=exploration_final_eps)
+    # exploration = LinearSchedule(schedule_timesteps=int(exploration_fraction * total_timesteps),
+    #                              initial_p=0.,
+    #                              final_p=exploration_final_eps)
 
     # Initialize the parameters and copy them to the target network.
     U.initialize()
@@ -223,7 +223,7 @@ def learn(env,
     episode_rewards = [0.0]
     saved_mean_reward = None
     obs = env.reset()
-    reset = True
+    # reset = True
     num_actions = env.action_space.n
 
     with tempfile.TemporaryDirectory() as td:
@@ -252,47 +252,48 @@ def learn(env,
 
             # action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
             actions_q_values = q_values(np.array(obs))[0]
-            entropy_train_values = softmax1D(actions_q_values).tolist()
+            entropy_train_values = actions_q_values.tolist()
             # print('entropy_train_values:', entropy_train_values)
             # print('sum(entropy_train_values):', np.sum(entropy_train_values))
             # print('actions_q_values:', actions_q_values)
 
             index_list = actions_q_values.argsort().tolist()
-            p = []
-            sum_p = 0
-            for i in range(len(index_list)):
-                rank = index_list.index(i)
-                el = pow(rank + 1e-6, exploration.value(t))
-                p.append(el)
-                sum_p += el
-            normalized_p = [el / sum_p for el in p]
-            normalized_p_numpy = np.array(normalized_p)
+            # p = []
+            # sum_p = 0
+            # for i in range(len(index_list)):
+            #     rank = index_list.index(i)
+            #     el = pow(rank + 1e-6, exploration.value(t))
+            #     p.append(el)
+            #     sum_p += el
+            # normalized_p = [el / sum_p for el in p]
+            # normalized_p_numpy = np.array(normalized_p)
+            #
+            # # check for NaN and inf values
+            # if not np.all(np.isfinite(p)):
+            #     print('p è NaN o inf')
+            #     print('p:', p)
+            #     print('actions_q_values:', actions_q_values)
+            # if not np.all(np.isfinite(normalized_p)):
+            #     print('normalized_p è NaN o inf')
+            #     print('normalized_p:', normalized_p)
+            #     print('actions_q_values:', actions_q_values)
+            #
+            # try:
+            #     action = np.random.choice(num_actions, p=normalized_p_numpy)
+            # except ValueError as e:
+            #     print('Errore:', e)
+            #     print('type(normalized_p):', type(normalized_p_numpy))
+            #     print('normalized_p:', normalized_p_numpy)
+            #     print('step:', t)
+            #     print('actions_q_values:', actions_q_values)
+            #     print('sum_modified_el:', sum_p)
+            #     print('p:', p)
+            #     raise SystemExit
 
-            # check for NaN and inf values
-            if not np.all(np.isfinite(p)):
-                print('p è NaN o inf')
-                print('p:', p)
-                print('actions_q_values:', actions_q_values)
-            if not np.all(np.isfinite(normalized_p)):
-                print('normalized_p è NaN o inf')
-                print('normalized_p:', normalized_p)
-                print('actions_q_values:', actions_q_values)
+            action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
 
-            try:
-                action = np.random.choice(num_actions, p=normalized_p_numpy)
-            except ValueError as e:
-                print('Errore:', e)
-                print('type(normalized_p):', type(normalized_p_numpy))
-                print('normalized_p:', normalized_p_numpy)
-                print('step:', t)
-                print('actions_q_values:', actions_q_values)
-                print('sum_modified_el:', sum_p)
-                print('p:', p)
-                raise SystemExit
-
-            env_action = action
-            reset = False
-            new_obs, rew, done, _ = env.step(env_action)
+            # reset = False
+            new_obs, rew, done, _ = env.step(action)
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done), entropy_train_values)
             obs = new_obs
@@ -301,12 +302,12 @@ def learn(env,
             if done:
                 obs = env.reset()
                 episode_rewards.append(0.0)
-                reset = True
+                # reset = True
 
             if t > learning_starts and t % train_freq == 0:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 obses_t, actions, rewards, obses_tp1, dones, actions_probability = replay_buffer.sample(batch_size)
-                weights, batch_idxes = np.ones_like(rewards), None
+                weights = np.ones_like(rewards)
                 actions_probability_ph, partial_entropy_1, partial_entropy_2, partial_entropy_3, entropy, weighted_error = train(obses_t, actions, rewards, obses_tp1, dones, weights, actions_probability)
 
             if t > learning_starts and t % target_network_update_freq == 0:
