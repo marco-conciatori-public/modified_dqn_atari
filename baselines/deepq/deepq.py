@@ -260,13 +260,13 @@ def learn(env,
             index_list = actions_q_values.argsort().tolist()
             p = []
             sum_p = 0
-            for rank in index_list:
+            for i in range(len(index_list)):
+                rank = index_list.index(i)
                 el = pow(rank + 1e6, exploration.value(t))
                 p.append(el)
                 sum_p += el
             normalized_p = [el / sum_p for el in p]
             normalized_p_numpy = np.array(normalized_p)
-            # print('normalized_p:', normalized_p)
 
             # check for NaN and inf values
             if not np.all(np.isfinite(p)):
@@ -322,9 +322,9 @@ def learn(env,
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
 
-                print('actions_q_values:', actions_q_values)
-                print('p:', p)
-                print('normalized_p:', normalized_p_numpy)
+                # print('actions_q_values:', actions_q_values)
+                # print('p:', p)
+                # print('normalized_p:', normalized_p_numpy)
                 # print('action:', action)
                 #
                 # if t > learning_starts + train_freq:
