@@ -402,13 +402,13 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
             q_tp1_using_online_net = q_func(obs_tp1_input.get(), num_actions, scope="q_func", reuse=True)
             q_tp1_best_using_online_net = tf.argmax(q_tp1_using_online_net, 1)
             q_tp1_best = tf.reduce_sum(q_tp1 * tf.one_hot(q_tp1_best_using_online_net, num_actions), 1)
-            print('act_t_ph:', act_t_ph)
-            print('actions_probability_ph:', actions_probability_ph)
+            # print('act_t_ph:', act_t_ph)
+            # print('actions_probability_ph:', actions_probability_ph)
             partial_entropy_1, partial_entropy_2, partial_entropy_3 = cat_entropy_softmax(actions_probability_ph)
             entropy = tf.reduce_mean(partial_entropy_3)
-            print('partial_entropy_1:', partial_entropy_1)
-            print('partial_entropy_2:', partial_entropy_2)
-            print('partial_entropy_3:', partial_entropy_3)
+            # print('partial_entropy_1:', partial_entropy_1)
+            # print('partial_entropy_2:', partial_entropy_2)
+            # print('partial_entropy_3:', partial_entropy_3)
             print('entropy:', entropy)
 
         else:
@@ -422,8 +422,8 @@ def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=
         td_error = q_t_selected - tf.stop_gradient(q_t_selected_target)
         errors = U.huber_loss(td_error)
         pre_weighted_error = tf.reduce_mean(importance_weights_ph * errors)
-        # weighted_error = pre_weighted_error - entropy_coeff * entropy
-        weighted_error = pre_weighted_error
+        weighted_error = pre_weighted_error - entropy_coeff * entropy
+        # weighted_error = pre_weighted_error
         print('weighted_error:', weighted_error)
 
         # compute optimization op (potentially with gradient clipping)
